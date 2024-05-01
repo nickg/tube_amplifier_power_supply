@@ -2,7 +2,6 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
-library work;
     use work.component_interconnect_pkg.all;
     use work.led_driver_pkg.all;
     use work.uart_pkg.all;

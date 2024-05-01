@@ -26,7 +26,7 @@ begin
         system_clocks
 	);
 ------------------------------------------------------------------------
-    u_system_control : system_control
+    u_system_control : entity work.system_control
         port map(
             system_clocks,
             system_control_FPGA_in,

@@ -5,11 +5,11 @@ library ieee;
 package system_clocks_pkg is
 
     type system_clock_group is record
-        core_clock : std_logic;
+        core_clock      : std_logic;
         modulator_clock : std_logic;
-        pll_lock : std_logic;
-        adc_clock : std_logic;
-        adc_pll_lock : std_logic;
+        pll_lock        : std_logic;
+        adc_clock       : std_logic;
+        adc_pll_lock    : std_logic;
     end record;
 
 end package system_clocks_pkg;

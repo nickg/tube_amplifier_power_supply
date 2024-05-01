@@ -1,4 +1,6 @@
 ECHO off
+
+call ./source/fpga_communication/ghdl_compile_fpga_communication.bat ./source/fpga_communication/
 set source=source/
 
 ghdl -a --ieee=synopsys --std=08 %source%/top/system_clocks_pkg.vhd
@@ -41,13 +43,11 @@ ghdl -a --ieee=synopsys --std=08 %source%/top/system_control/component_interconn
 ghdl -a --ieee=synopsys --std=08 %source%/top/system_control/component_interconnect/power_supply_control/dhb_control/phase_modulator/phase_modulator_pkg.vhd
 ghdl -a --ieee=synopsys --std=08 %source%/top/system_control/component_interconnect/power_supply_control/dhb_control/dhb_control_pkg.vhd
 ghdl -a --ieee=synopsys --std=08 %source%/top/system_control/component_interconnect/power_supply_control/power_supply_control_pkg.vhd
-ghdl -a --ieee=synopsys --std=08 %source%/top/system_control/component_interconnect/uart/uart_pkg.vhd
 rem
 ghdl -a --ieee=synopsys --std=08 %source%/top/system_control/led_driver/led_driver_pkg.vhd
 rem
 ghdl -a --ieee=synopsys --std=08 %source%/top/system_control/component_interconnect/component_interconnect_pkg.vhd
 ghdl -a --ieee=synopsys --std=08 %source%/top/system_control/system_control_pkg.vhd
-ghdl -a --ieee=synopsys --std=08 %source%/top/system_control/system_control_internal_pkg.vhd
 
 rem ghdl -a --ieee=synopsys --std=08 %source%/ecp5/ecp5_pll_wrapper.vhd
 rem ghdl -a --ieee=synopsys --std=08 %source%/spartan_7/s7_specifics.vhd

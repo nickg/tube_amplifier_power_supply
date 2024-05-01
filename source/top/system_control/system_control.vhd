@@ -7,8 +7,6 @@ library ieee;
     use work.component_interconnect_pkg.all;
     use work.led_driver_pkg.all;
 
-    use work.system_control_internal_pkg.all;
-
 library common_library;
     use common_library.timing_pkg.all;
 
@@ -17,14 +15,14 @@ library onboard_adc_library;
     use onboard_adc_library.measurement_interface_pkg.all;
     use onboard_adc_library.psu_measurement_interface_pkg.all;
 
-entity system_control is
-    port (
-        system_clocks : in system_clock_group;    
-
-        system_control_FPGA_in : in system_control_FPGA_input_group;
-        system_control_FPGA_out : out system_control_FPGA_output_group
-    );
-end entity system_control;
+-- entity system_control is
+--     port (
+--         system_clocks : in system_clock_group;    
+--
+--         system_control_FPGA_in : in system_control_FPGA_input_group;
+--         system_control_FPGA_out : out system_control_FPGA_output_group
+--     );
+-- end entity system_control;
 
 architecture rtl of system_control is
 
