@@ -1,11 +1,10 @@
-**Tube amplifier power supply**
+# Tube amplifier power supply
 
-This is a repository for a tube amplifier power supply FPGA control. The original master branch was lost with old computer, but the code will be refactored to use hVHDL libraries.
+This is a repository for a tube amplifier power supply FPGA control. The power supply consists of a PFC, 6.3V/10A LLC, 420V/1A dual active half bridge and an fpga to contorl them. The auxiliary supplies are also provided by a DCM flyback converter built around IW1818
 
-The power supply consists of a PFC, 6.3V/10A LLC, 420V/1A dual active half bridge and an fpga to contorl them. The auxiliary supplies are also provided by a DCM flyback converter built around IW1818
+This power supply was designed originally during university studies and finished in 2017. There was a report on the design which is part of this repository tube_amp_power.pdf. The power supply was never installed and the original repository was lost at some point hence this repository picks up at the point which was recovered from some old copy. I will probably make some sort of writeup since this is exactly the same situation which is common when some old legacy codebase needs to be maintained :)
 
-
-# Refactoring
+## Refactoring
 The original master branch was lost, so we will recreate the design with the current development branch. The hardware has been verified to work hence we know that the ad timings are correct. Originally code was tested and developed with hardware directly, hence we will add simulations and tests to make the redesign substantially easier.
 
 ## hVHDL libraries
