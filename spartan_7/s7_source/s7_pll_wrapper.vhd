@@ -2,7 +2,7 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
-        use work.vendor_specifics_pkg.all;
+    use work.vendor_specifics_pkg.all;
 
 entity pll_wrapper is
     port (
@@ -34,7 +34,7 @@ begin
     modulator_clk2 <= r_modulator_clk;
 
     core_clocks : pll_1x256mhz
-    port map(r_modulator_clk, core_clk, pll_lock, xclk);
+    port map(core_clk, r_modulator_clk, pll_lock, xclk);
 
 
 

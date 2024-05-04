@@ -22,11 +22,11 @@ begin
     clocks : entity work.pll_wrapper
 	port map
 	(
-		xclk => xclk,
-        core_clk => system_clocks.core_clock,
-        modulator_clk => system_clocks.modulator_clock,
-        modulator_clk2 =>  system_clocks.adc_clock,
-        pll_lock => system_clocks.pll_lock
+		xclk           => xclk,
+        core_clk       => system_clocks.core_clock,
+        modulator_clk  => system_clocks.modulator_clock,
+        modulator_clk2 => system_clocks.adc_clock,
+        pll_lock       => system_clocks.pll_lock
 	);
 	system_clocks.adc_pll_lock <= system_clocks.pll_lock;
 ------------------------------------------------------------------------
