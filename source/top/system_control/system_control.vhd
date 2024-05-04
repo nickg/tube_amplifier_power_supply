@@ -43,6 +43,16 @@ architecture rtl of system_control is
     signal delay_timer_1ms_data_in  : delay_timer_data_input_group;
     signal delay_timer_1ms_data_out : delay_timer_data_output_group;
 
+    type t_system_states is (init,
+                    charge_dc_link,
+                    bypass_relay, 
+                    start_power_supplies, 
+                    start_heaters, 
+                    start_dhb, 
+                    system_running,
+                    stop);
+    signal st_main_states : t_system_states := init;
+
 begin
 ------------------------------------------------------------------------
     u_delay_timer : delay_timer
@@ -53,15 +63,6 @@ begin
 
 ----------------------------------------------------------------------
     system_main : process(system_clocks.core_clock) is
-        type t_system_states is (init,
-                        charge_dc_link,
-                        bypass_relay, 
-                        start_power_supplies, 
-                        start_heaters, 
-                        start_dhb, 
-                        system_running,
-                        stop);
-		variable st_main_states : t_system_states;
 
         alias onboard_adc : measurement_interface_data_output_group is component_interconnect_data_out.measurement_interface_data_out;
 
@@ -73,7 +74,7 @@ begin
             led2_color <= led_color_red;
             led3_color <= led_color_red;
             dc_link_measurement <= 0;
-            st_main_states := init;
+            st_main_states <= init;
             disable_power_supplies(component_interconnect_data_in);
         else
 
@@ -89,9 +90,9 @@ begin
                     system_control_FPGA_out.bypass_relay <= '0';
                     disable_power_supplies(component_interconnect_data_in);
 
-                    st_main_states := init;
+                    st_main_states <= init;
                     if system_clocks.pll_lock = '1' then
-                        st_main_states := charge_dc_link;
+                        st_main_states <= charge_dc_link;
                     end if;
 
                 WHEN charge_dc_link=> 
@@ -104,9 +105,9 @@ begin
                     disable_power_supplies(component_interconnect_data_in);
 
                     -- wait until DC link above 80V
-                    st_main_states := charge_dc_link; 
+                    st_main_states <= charge_dc_link; 
                     if dc_link_measurement > 4000 then
-                            st_main_states := bypass_relay;
+                            st_main_states <= bypass_relay;
                     end if;
                 WHEN bypass_relay=> 
 
@@ -119,9 +120,9 @@ begin
 
                     request_delay(delay_timer_1ms_data_in,delay_timer_1ms_data_out,60);
 
-                    st_main_states := bypass_relay; 
+                    st_main_states <= bypass_relay; 
                     if timer_is_ready(delay_timer_1ms_data_out) then
-                        st_main_states := start_power_supplies;
+                        st_main_states <= start_power_supplies;
                     end if;
 
                 WHEN start_power_supplies =>
@@ -138,9 +139,9 @@ begin
                     component_interconnect_data_in.power_supplies_are_enabled <= true;
 
                     
-                    st_main_states := start_power_supplies; 
+                    st_main_states <= start_power_supplies; 
                     if timer_is_ready(delay_timer_1ms_data_out) OR zero_cross_event = '1' then
-                        st_main_states := system_running;
+                        st_main_states <= system_running;
                         init_timer(delay_timer_1ms_data_in);
                     end if;
                     
@@ -154,13 +155,13 @@ begin
                     request_delay(delay_timer_1ms_data_in,delay_timer_1ms_data_out,800);
                     enable_power_supplies(component_interconnect_data_in);
 
-                    st_main_states := system_running; 
+                    st_main_states <= system_running; 
                     if timer_is_ready(delay_timer_1ms_data_out) then
                         -- st_main_states := start_power_supplies; 
                     end if;
 
                 WHEN others=>
-                    st_main_states := init;
+                    st_main_states <= init;
             end CASE;
         end if;
 
