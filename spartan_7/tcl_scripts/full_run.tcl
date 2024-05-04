@@ -1,7 +1,10 @@
 #Define target part and create output directory
+variable tcl_path [ file dirname [ file normalize [ info script ] ] ] 
+
 set outputDir ./output
-set source_dir $argv
 file mkdir $outputDir
+set source_folder $tcl_path/../../source
+
 set files [glob -nocomplain "$outputDir/*"]
 if {[llength $files] != 0} {
     # clear folder contents
@@ -11,7 +14,26 @@ if {[llength $files] != 0} {
     puts "$outputDir is empty"
 }
 
-source ./tcl_scripts/read_sources.tcl
+set target_device xc7s15ftgb196-2
+create_project -force -in_memory tube_psu_v5
+
+set_property part $target_device [current_project]
+set_property target_language VHDL [current_project]
+
+    proc add_vhdl_file_to_project {vhdl_file} {
+        read_vhdl -vhdl2008 $vhdl_file
+    }
+
+    proc add_vhdl_file_to_library {vhdl_file library} {
+        read_vhdl -vhdl2008 -library $library $vhdl_file 
+    }
+
+
+# wait_on_run main_clock_synth_1
+
+source $tcl_path/read_sources.tcl
+
+set_property top top [current_fileset]
 
 synth_design -top top -part $partNum
 write_checkpoint -force $outputDir/post_synth.dcp
@@ -34,18 +56,13 @@ report_timing_summary -file $outputDir/post_place_timing_summary.rpt
 #Route design and generate bitstream
 route_design -directive Explore
 write_checkpoint -force $outputDir/post_route.dcp
-report_route_status -file $outputDir/post_route_status.rpt
-report_timing_summary -file $outputDir/post_route_timing_summary.rpt
-report_power -file $outputDir/post_route_power.rpt
-report_drc -file $outputDir/post_imp_drc.rpt
-write_verilog -force $outputDir/cpu_impl_netlist.v -mode timesim -sdf_anno true
-
-#VCCO(zero) = IO = 2.5V || 3.3V, GND IO bank0 = 1.8v
+# #VCCO(zero) = IO = 2.5V || 3.3V, GND IO bank0 = 1.8v
 set_property CFGBVS VCCO [current_design]
 set_property CONFIG_VOLTAGE 3.3 [current_design]
 set_property BITSTREAM.Config.SPI_BUSWIDTH 4 [current_design]
 set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
-write_bitstream -force $outputDir/testibitstream.bit
-set ajoitus [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]];
 
-puts "worst slack $ajoitus"
+write_bitstream -force hvhdl_example_project_ram_image.bit
+write_cfgmem -force  -format mcs -size 2 -interface SPIx4        \
+    -loadbit "up 0x0 hvhdl_example_project_ram_image.bit" \
+    -file "hvhdl_example_project_flash_image.mcs"

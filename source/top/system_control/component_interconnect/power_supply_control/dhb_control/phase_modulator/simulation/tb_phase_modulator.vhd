@@ -6,7 +6,6 @@ LIBRARY std  ;
     use ieee.math_real.all;
     USE std.textio.all  ; 
 
-library work;
     use work.phase_modulator_pkg.all;
 
 entity tb_phase_modulator is

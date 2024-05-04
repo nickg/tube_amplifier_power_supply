@@ -12,7 +12,6 @@ library common_library;
     use common_library.timing_pkg.all;
     use common_library.typedefines_pkg.all;
 
-library work;
     use work.dhb_control_pkg.all;
     use work.phase_modulator_pkg.all;
     use work.multiplier_pkg.all;

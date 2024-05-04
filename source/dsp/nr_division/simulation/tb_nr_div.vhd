@@ -6,7 +6,6 @@ LIBRARY std  ;
     use ieee.math_real.all;
     USE std.textio.all  ; 
 
-library work;
     use work.multiplier_pkg.all;
 
 entity tb_nr_div is

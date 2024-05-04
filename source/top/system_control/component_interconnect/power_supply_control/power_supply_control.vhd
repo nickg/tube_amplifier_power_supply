@@ -5,7 +5,6 @@ library ieee;
 library onboard_adc_library;
     use onboard_adc_library.onboard_ad_control_pkg.all;
 
-library work;
     use work.power_supply_control_pkg.all;
     use work.pfc_control_pkg.all;
     use work.llc_control_pkg.all;

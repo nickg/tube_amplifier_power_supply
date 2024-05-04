@@ -10,7 +10,6 @@ library common_library;
     use common_library.timing_pkg.all;
     use common_library.typedefines_pkg.all;
 
-library work;
     use work.llc_control_pkg.all;
     use work.llc_control_internal_pkg.all;
     use work.llc_modulator_pkg.all;

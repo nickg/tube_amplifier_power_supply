@@ -2,7 +2,6 @@ library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
 
-library work;
     use work.system_clocks_pkg.all;
 
 entity pll_wrapper is

@@ -5,7 +5,6 @@ library ieee;
 library common_library;
     use common_library.register_shifts_pkg.all;
 
-library work;
     use work.llc_modulator_pkg.all;
 
 entity llc_modulator is

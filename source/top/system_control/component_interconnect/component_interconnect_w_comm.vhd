@@ -7,8 +7,8 @@ library ieee;
     use work.multiplier_pkg.all;
     use work.power_supply_control_pkg.all;
     use work.sincos_pkg.all;
-    use work.cl10_fifo_control_pkg.all;
-    use work.ram_control_pkg.all;
+    -- use work.cl10_fifo_control_pkg.all;
+    -- use work.ram_control_pkg.all;
 
     use work.fpga_interconnect_pkg.all;
     

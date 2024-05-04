@@ -6,7 +6,6 @@ LIBRARY std  ;
     use ieee.math_real.all;
     USE std.textio.all  ; 
 
-library work;
     use work.max_11115_pkg.all;
 
 entity tb_max_11115 is
