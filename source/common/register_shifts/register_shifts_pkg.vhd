@@ -8,6 +8,10 @@ package register_shifts_pkg is
     procedure shift_register ( signal data_vector : inout std_logic_vector;
         input_data : std_logic);
 ------------------------------------------------------------------------
+    procedure shift_register (
+        signal data_vector : inout std_logic_vector;
+        input_data : std_logic_vector);
+------------------------------------------------------------------------
 
 end package register_shifts_pkg;
 
@@ -21,6 +25,17 @@ package body register_shifts_pkg is
     begin
 
         data_vector <= data_vector(data_vector'left-1 downto 0) & input_data;
+        
+    end shift_register;
+------------------------------------------------------------------------
+    procedure shift_register
+    (
+        signal data_vector : inout std_logic_vector;
+        input_data : std_logic_vector
+    ) is
+    begin
+
+        data_vector <= data_vector(data_vector'left-input_data'length downto 0) & input_data;
         
     end shift_register;
 ------------------------------------------------------------------------

@@ -4,7 +4,6 @@ library ieee;
 
     use work.component_interconnect_pkg.all;
     use work.led_driver_pkg.all;
-    use work.uart_pkg.all;
     use work.multiplier_pkg.all;
     use work.power_supply_control_pkg.all;
     use work.sincos_pkg.all;

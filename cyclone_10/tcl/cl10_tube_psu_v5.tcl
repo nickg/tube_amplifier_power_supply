@@ -37,7 +37,9 @@ set options \
 
 array set opts [::cmdline::getoptions quartus(args) $options]
 
-set tcl_scripts $opts(source_path)
+variable this_file_path [ file dirname [ file normalize [ info script ] ] ]
+
+set tcl_scripts $this_file_path
 set source_folder $tcl_scripts/../../source
 
 set need_to_close_project 0
@@ -67,6 +69,13 @@ else \
 }
 
 # read sources
+    proc add_vhdl_file_to_project {vhdl_file} {
+        set_global_assignment -name VHDL_FILE $vhdl_file
+    }
+
+    proc add_vhdl_file_to_library {vhdl_file library} {
+        set_global_assignment -name VHDL_FILE $vhdl_file -library $library
+    }
 source ../list_of_sources.tcl
 
 	# set_global_assignment -name MIF_FILE $tcl_scripts/../intel_specifics/memory_files/sine_u16x512_halfpi.mif
@@ -85,21 +94,22 @@ source ../list_of_sources.tcl
 	set_global_assignment -name VHDL_FILE $source_folder/../cyclone_10/source_cl10/cl10_adc_wrapper.vhd
 	set_global_assignment -name VHDL_FILE $source_folder/../cyclone_10/source_cl10/cl10_multiplier_wrapper.vhd
 
-    foreach x [read_sources ../] \
-    { \
-        if {[lsearch -glob $x *measurement_interface*] == 0} \
-        { \
-            set_global_assignment -name VHDL_FILE $source_folder/$x -library onboard_adc_library
-        } \
-        elseif {[lsearch -glob $x *common*] == 0} \
-        { \
-            set_global_assignment -name VHDL_FILE $source_folder/$x -library common_library
-        } \
-        else \
-        { \
-            set_global_assignment -name VHDL_FILE $source_folder/$x \
-        } 
-    }
+
+    # foreach x [read_sources ../] \
+    # { \
+    #     if {[lsearch -glob $x *measurement_interface*] == 0} \
+    #     { \
+    #         set_global_assignment -name VHDL_FILE $source_folder/$x -library onboard_adc_library
+    #     } \
+    #     elseif {[lsearch -glob $x *common*] == 0} \
+    #     { \
+    #         set_global_assignment -name VHDL_FILE $source_folder/$x -library common_library
+    #     } \
+    #     else \
+    #     { \
+    #         set_global_assignment -name VHDL_FILE $source_folder/$x \
+    #     } 
+    # }
 
 # Make assignments
 	set_global_assignment -name ORIGINAL_QUARTUS_VERSION 17.0.2
