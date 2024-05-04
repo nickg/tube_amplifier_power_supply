@@ -6,8 +6,6 @@ if { [file isdirectory "IP/sign_mult_18x18/"] } {
     read_ip IP/sign_mult_18x18/sign_mult_18x18.xci
 } else {
        set partNum xc7s15ftgb196-2
-       create_project -in_memory -part $partNum
-
         if { [file isdirectory "IP/"] } {
         } else {
                 file mkdir IP

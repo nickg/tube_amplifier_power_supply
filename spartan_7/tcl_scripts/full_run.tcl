@@ -16,9 +16,8 @@ if {[llength $files] != 0} {
 
 set target_device xc7s15ftgb196-2
 create_project -force -in_memory tube_psu_v5
-
-set_property part $target_device [current_project]
 set_property target_language VHDL [current_project]
+set_property part $target_device [current_project]
 
     proc add_vhdl_file_to_project {vhdl_file} {
         read_vhdl -vhdl2008 $vhdl_file
@@ -28,26 +27,24 @@ set_property target_language VHDL [current_project]
         read_vhdl -vhdl2008 -library $library $vhdl_file 
     }
 
-
-
 source $tcl_path/read_sources.tcl
 
-
 synth_design
+read_xdc $tcl_path/../constraints/constraints.xdc
 write_checkpoint -force $outputDir/post_synth.dcp
 report_timing_summary -file $outputDir/post_synth_timing_summary.rpt
 report_utilization -file $outputDir/post_synth_util.rpt
 
- opt_design
- place_design
- report_clock_utilization -file $outputDir/clock_util.rpt
+opt_design
+place_design
+report_clock_utilization -file $outputDir/clock_util.rpt
 
 #get timing violations and run optimizations if needed
  if {[get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]] < 0.1} {
   puts "Found setup timing violations => running physical optimization"
   phys_opt_design
  }
- write_checkpoint -force $outputDir/post_place.dcp
+write_checkpoint -force $outputDir/post_place.dcp
 report_utilization -file $outputDir/post_place_util.rpt
 report_timing_summary -file $outputDir/post_place_timing_summary.rpt
 
