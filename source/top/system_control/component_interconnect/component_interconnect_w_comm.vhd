@@ -100,5 +100,13 @@ begin
             bus_from_communications => bus_from_communications
         );
 
+        process(system_clocks.core_clock) is
+        begin
+            if rising_edge(system_clocks.core_clock) then
+                init_bus(bus_to_communications);
+                connect_read_only_data_to_address(bus_from_communications, bus_to_communications, 100, 44252);
+            end if;
+        end process;
+
 ------------------------------------------------------------------------
 end rtl;
