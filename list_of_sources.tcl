@@ -65,4 +65,3 @@ add_vhdl_file_to_project $source_folder/top/system_control/system_control_pkg.vh
 add_vhdl_file_to_project $source_folder/top/system_control/system_control_internal_pkg.vhd 
 add_vhdl_file_to_project $source_folder/top/system_control/system_control.vhd 
 
-add_vhdl_file_to_project $source_folder/top/top.vhd

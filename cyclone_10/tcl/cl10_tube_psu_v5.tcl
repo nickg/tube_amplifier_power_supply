@@ -76,6 +76,7 @@ else \
     proc add_vhdl_file_to_library {vhdl_file library} {
         set_global_assignment -name VHDL_FILE $vhdl_file -library $library
     }
+add_vhdl_file_to_project $source_folder/top/top.vhd
 source ../list_of_sources.tcl
 
 	# set_global_assignment -name MIF_FILE $tcl_scripts/../intel_specifics/memory_files/sine_u16x512_halfpi.mif
