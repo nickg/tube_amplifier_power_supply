@@ -82,3 +82,4 @@ unused.hex
 *.str
 *webtalk.*
 vunit_out/
+build/
