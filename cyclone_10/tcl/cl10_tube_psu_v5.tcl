@@ -38,6 +38,7 @@ set options \
 array set opts [::cmdline::getoptions quartus(args) $options]
 
 variable this_file_path [ file dirname [ file normalize [ info script ] ] ]
+variable tcl_path [ file dirname [ file normalize [ info script ] ] ] 
 
 set tcl_scripts $this_file_path
 set source_folder $tcl_scripts/../../source
@@ -77,7 +78,9 @@ else \
         set_global_assignment -name VHDL_FILE $vhdl_file -library $library
     }
 add_vhdl_file_to_project $source_folder/top/top.vhd
-source ../list_of_sources.tcl
+
+source $source_folder/../list_of_sources.tcl
+source $source_folder/../fpga_communication_sources.tcl
 
 	# set_global_assignment -name MIF_FILE $tcl_scripts/../intel_specifics/memory_files/sine_u16x512_halfpi.mif
 	# set_global_assignment -name QIP_FILE $tcl_scripts/../intel_specifics/memory_files/rom1port_16x512.qip
@@ -200,8 +203,6 @@ place_fpga_pins_for_$fpga_device
 
 set_global_assignment -name SDC_FILE $tcl_scripts/cl10_tubepsu_constraints.sdc
 
-#compile flow
-#
 execute_flow -compile
 
 #call external executables to generate flash image and program cfi flash
