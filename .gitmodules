@@ -4,3 +4,6 @@
 [submodule "source/hVHDL_dynamic_model_verification_library"]
 	path = source/hVHDL_dynamic_model_verification_library
 	url = https://github.com/hVHDL/hVHDL_dynamic_model_verification_library
+[submodule "source/hVHDL_fixed_point"]
+	path = source/hVHDL_fixed_point
+	url = https://github.com/hVHDL/hVHDL_fixed_point.git
