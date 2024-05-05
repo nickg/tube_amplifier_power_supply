@@ -83,3 +83,5 @@ unused.hex
 *webtalk.*
 vunit_out/
 build/
+build_cyclone/
+
