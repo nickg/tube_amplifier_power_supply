@@ -6,7 +6,7 @@ library ieee;
     use work.system_control_pkg.all;
     use work.component_interconnect_pkg.all;
     use work.led_driver_pkg.all;
-    use work.fpga_interconnect_pkg.all;
+    use work.tubepsu_addresses_pkg.all;
 
 library common_library;
     use common_library.timing_pkg.all;
@@ -27,10 +27,7 @@ library onboard_adc_library;
 
 architecture rtl of system_control is
 
-    signal r_so_uart_ready_event : std_logic;
-    signal r_so16_uart_rx_data : std_logic_vector(15 downto 0);
-
-    signal zero_cross_event : std_logic;
+    signal zero_cross_event : std_logic := '0';
 
     signal dc_link_measurement : integer;
 
@@ -74,7 +71,8 @@ begin
 
 	if rising_edge(system_clocks.core_clock) then
         init_bus(bus_from_system_control);
-        connect_read_only_data_to_address(bus_to_system_control, bus_from_system_control, 101, 12345);
+        connect_read_only_data_to_address(bus_to_system_control , bus_from_system_control , system_control_test_address    , 12345);
+        connect_read_only_data_to_address(bus_to_system_control , bus_from_system_control , system_control_dc_link_address , dc_link_measurement);
 
         if system_clocks.pll_lock = '0' then
             led1_color <= led_color_red; 

@@ -3,6 +3,8 @@ ECHO off
 call ./source/fpga_communication/ghdl_compile_fpga_communication.bat ./source/fpga_communication/
 set source=source/
 
+ghdl -a --ieee=synopsys --std=08 tubepsu_addresses_pkg.vhd
+
 ghdl -a --ieee=synopsys --std=08 %source%/top/system_clocks_pkg.vhd
 ghdl -a --ieee=synopsys --std=08 %source%/../cyclone_10/source_cl10/cl10_pll_wrapper.vhd
 ghdl -a --ieee=synopsys --std=08 %source%/../cyclone_10/source_cl10/cl10_fifo_control_pkg.vhd

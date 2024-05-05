@@ -1,45 +1,9 @@
-library ieee;
-    use ieee.std_logic_1164.all;
-    use ieee.numeric_std.all;
-
-    use work.component_interconnect_pkg.all;
-    use work.led_driver_pkg.all;
-    use work.multiplier_pkg.all;
-    use work.power_supply_control_pkg.all;
-    use work.sincos_pkg.all;
-    -- use work.cl10_fifo_control_pkg.all;
-    -- use work.ram_control_pkg.all;
-
-    use work.fpga_interconnect_pkg.all;
-    
-library onboard_adc_library;
-    use onboard_adc_library.onboard_ad_control_pkg.get_ad_measurement;
-    use onboard_adc_library.onboard_ad_control_pkg.ad_channel_is_ready;
-    use onboard_adc_library.measurement_interface_pkg.all;
-    use onboard_adc_library.psu_measurement_interface_pkg.all;
-
-library common_library;
-    use common_library.timing_pkg.all;
-    use common_library.typedefines_pkg.all;
-
-entity component_interconnect is
-    port (
-        system_clocks : in work.system_clocks_pkg.system_clock_group;    
-
-        component_interconnect_FPGA_in : in component_interconnect_FPGA_input_group;
-        component_interconnect_FPGA_out : out component_interconnect_FPGA_output_group;
-
-        component_interconnect_data_in : in component_interconnect_data_input_group;
-        component_interconnect_data_out : out component_interconnect_data_output_group;
-
-        bus_to_component_interconnect   : in fpga_interconnect_record;
-        bus_from_component_interconnect : out fpga_interconnect_record
-    );
-end entity component_interconnect;
 
 architecture rtl of component_interconnect is
     alias core_clock is system_clocks.core_clock;
     alias reset_n is system_clocks.pll_lock;
+
+    use work.tubepsu_addresses_pkg.all;
 
 ------------------------------------------------------------------------
     signal measurement_interface_clocks   : measurement_interface_clock_group;
@@ -97,12 +61,13 @@ begin
 ------------------------------------------------------------------------
     u_communications : entity work.fpga_communications
         port map(
-            clock                   => system_clocks.core_clock                           ,
-            uart_rx                 => component_interconnect_FPGA_in.pi_uart_rx_serial   ,
+            clock                   => system_clocks.core_clock                          ,
+            uart_rx                 => component_interconnect_FPGA_in.pi_uart_rx_serial  ,
             uart_tx                 => component_interconnect_FPGA_out.po_uart_tx_serial ,
-            bus_to_communications   => bus_to_communications                              ,
+            bus_to_communications   => bus_to_communications                             ,
             bus_from_communications => bus_from_communications
         );
+------------------------------------------------------------------------
 
         bus_from_component_interconnect <= bus_from_communications;
 
@@ -110,12 +75,11 @@ begin
         begin
             if rising_edge(system_clocks.core_clock) then
                 init_bus(bus_out);
-                connect_read_only_data_to_address(bus_from_communications, bus_out, 100, 44252);
+                connect_read_only_data_to_address(bus_from_communications, bus_out, interconnect_test_address, 44252);
 
                 bus_to_communications <= bus_out and 
                                          bus_to_component_interconnect;
             end if;
         end process;
-
 ------------------------------------------------------------------------
 end rtl;

@@ -1,3 +1,4 @@
+add_vhdl_file_to_project $source_folder/../tubepsu_addresses_pkg.vhd
 add_vhdl_file_to_project $source_folder/top/system_clocks_pkg.vhd
 
 add_vhdl_file_to_project $source_folder/dsp/multiplier/multiplier_pkg.vhd 

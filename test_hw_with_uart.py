@@ -10,3 +10,4 @@ from uart_communication_functions import *
 uart = uart_link(comport, 128e6/24)
 print("component interconnect data : ", uart.request_data_from_address(100))
 print("system control data : ", uart.request_data_from_address(101))
+uart.plot_data_from_address(102, 1000);
