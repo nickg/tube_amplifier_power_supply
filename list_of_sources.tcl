@@ -52,7 +52,7 @@ add_vhdl_file_to_project $source_folder/top/system_control/component_interconnec
 add_vhdl_file_to_project $source_folder/top/system_control/component_interconnect/power_supply_control/power_supply_control.vhd
 
 add_vhdl_file_to_project $source_folder/top/system_control/component_interconnect/component_interconnect_pkg.vhd
-add_vhdl_file_to_project $source_folder/top/system_control/component_interconnect/component_interconnect_w_comm.vhd
+add_vhdl_file_to_project $source_folder/top/system_control/component_interconnect/component_interconnect.vhd
 
 add_vhdl_file_to_project $source_folder/top/system_control/system_control_pkg.vhd 
 add_vhdl_file_to_project $source_folder/top/system_control/system_control_internal_pkg.vhd 
