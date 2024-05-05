@@ -8,7 +8,11 @@ library ieee;
 entity top is
     port(
 	    xclk : in std_logic;
-        system_control_FPGA_in  : in system_control_FPGA_input_group;
+        dhb_ad_data       : in std_logic;
+        llc_ad_data       : in std_logic;
+        ada_data          : in std_logic;
+        adb_data          : in std_logic;
+        pi_uart_rx_serial : in std_logic;
         system_control_FPGA_out : out system_control_FPGA_output_group
     );
 end top;
@@ -16,8 +20,15 @@ end top;
 architecture behavioral of top is
 
     signal system_clocks : system_clock_group;
+    signal system_control_FPGA_in  : system_control_FPGA_input_group;
+
 
 begin
+    system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.dhb_ad_data <= dhb_ad_data;
+    system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.llc_ad_data <= llc_ad_data;
+    system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.onboard_ad_control_FPGA_in.ada_data <= ada_data;
+    system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.onboard_ad_control_FPGA_in.adb_data <= adb_data;
+    system_control_FPGA_in.component_interconnect_FPGA_in.pi_uart_rx_serial <= pi_uart_rx_serial;
 ------------------------------------------------------------------------
     clocks : entity work.pll_wrapper
 	port map
