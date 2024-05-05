@@ -62,18 +62,18 @@ architecture behavioral of top is
 
 begin
 
-
 ------------------------------------------------------------------------
     clocks : entity work.pll_wrapper
-	port map
-	(
+	port map (
 		xclk           => xclk,
         core_clk       => system_clocks.core_clock,
         modulator_clk  => system_clocks.modulator_clock,
         modulator_clk2 => system_clocks.adc_clock,
         pll_lock       => system_clocks.pll_lock
 	);
+
 	system_clocks.adc_pll_lock <= system_clocks.pll_lock;
+
 ------------------------------------------------------------------------
     u_system_control : entity work.system_control
         port map(
@@ -93,7 +93,6 @@ begin
             system_control_FPGA_out.component_interconnect_FPGA_out.measurement_interface_FPGA_out.onboard_ad_control_FPGA_out.adb_clock => adb_clock ,
             system_control_FPGA_out.component_interconnect_FPGA_out.measurement_interface_FPGA_out.onboard_ad_control_FPGA_out.adb_cs    => adb_cs    ,
             system_control_FPGA_out.component_interconnect_FPGA_out.measurement_interface_FPGA_out.onboard_ad_control_FPGA_out.adb_mux   => adb_mux   ,
-
 
             system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.dhb_control_FPGA_out.phase_modulator_FPGA_out.primary.high_gate => dhb_primary_high     ,
             system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.dhb_control_FPGA_out.phase_modulator_FPGA_out.primary.low_gate  => dhb_primary_low      ,
