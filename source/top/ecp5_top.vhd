@@ -21,7 +21,6 @@ entity top is
         adb_cs    : out std_logic;
         adb_mux   : out std_logic_vector(2 downto 0);
 
-
         -- dhb io
         dhb_primary_high : out std_logic;
         dhb_primary_low  : out std_logic;
@@ -64,8 +63,7 @@ begin
 
 ------------------------------------------------------------------------
     clocks : entity work.pll_wrapper
-	port map
-	(
+	port map (
 		xclk,
         system_clocks
 	);
