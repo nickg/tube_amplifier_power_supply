@@ -14,25 +14,38 @@ if {[llength $files] != 0} {
     puts "$outputDir is empty"
 }
 
+proc add_vhdl_file_to_project {vhdl_file} {
+    read_vhdl -vhdl2008 $vhdl_file
+}
+
+proc add_vhdl_file_to_library {vhdl_file library} {
+    read_vhdl -vhdl2008 -library $library $vhdl_file 
+}
+
+proc set_3v3_io {pin_name_from_port package_pin_location} {
+    set_property IOSTANDARD LVCMOS33 [get_ports *$pin_name_from_port*]
+    place_ports *$pin_name_from_port* $package_pin_location
+}
+
 set target_device xc7s15ftgb196-2
 create_project -force -in_memory tube_psu_v5
 set_property target_language VHDL [current_project]
 set_property part $target_device [current_project]
 
-    proc add_vhdl_file_to_project {vhdl_file} {
-        read_vhdl -vhdl2008 $vhdl_file
-    }
+add_vhdl_file_to_project $tcl_path/../s7_source/s7_adc_wrapper.vhd
+add_vhdl_file_to_project $tcl_path/../s7_source/s7_specifics.vhd
+add_vhdl_file_to_project $tcl_path/../s7_source/s7_multiplier_wrapper.vhd
+add_vhdl_file_to_project $tcl_path/../s7_source/s7_pll_wrapper.vhd
 
-    proc add_vhdl_file_to_library {vhdl_file library} {
-        read_vhdl -vhdl2008 -library $library $vhdl_file 
-    }
+source $source_folder/../list_of_sources.tcl
 
-    proc set_3v3_io {pin_name_from_port package_pin_location} {
-        set_property IOSTANDARD LVCMOS33 [get_ports *$pin_name_from_port*]
-        place_ports *$pin_name_from_port* $package_pin_location
-    }
+source $tcl_path/ipgen_main_pll.tcl
+source $tcl_path/ipgen_mult_18x18.tcl
+# source $tcl_path/ipgen_ab_sum_c.tcl
 
-source $tcl_path/read_sources.tcl
+add_vhdl_file_to_project $source_folder/top/s7_top.vhd
+set_property top top [current_fileset]
+
 synth_design
 
 set_3v3_io xclk             H11
@@ -59,8 +72,6 @@ set_3v3_io dhb_ad_data      J2
 set_3v3_io dhb_ad_clock     L1
 
 
-set_3v3_io ac1_switch          G1 
-set_3v3_io ac2_switch          A4 
 set_3v3_io \[po3_led1\]\[red\]         F14
 set_3v3_io \[po3_led1\]\[blue\]        D13
 set_3v3_io \[po3_led1\]\[green\]       G14
@@ -70,6 +81,10 @@ set_3v3_io \[po3_led2\]\[green\]       J12
 set_3v3_io \[po3_led3\]\[red\]         J13
 set_3v3_io \[po3_led3\]\[blue\]        J14
 set_3v3_io \[po3_led3\]\[green\]       L14
+
+# pfc gates
+set_3v3_io ac1_switch          G1 
+set_3v3_io ac2_switch          A4 
 
 # dhb gates
 set_3v3_io \[primary\]\[high_gate\]     P5 
@@ -84,7 +99,6 @@ set_3v3_io sync1         M2
 set_3v3_io sync2         L3 
 
 
-# read_xdc $tcl_path/../constraints/constraints.xdc
 write_checkpoint -force $outputDir/post_synth.dcp
 report_timing_summary -file $outputDir/post_synth_timing_summary.rpt
 report_utilization -file $outputDir/post_synth_util.rpt
