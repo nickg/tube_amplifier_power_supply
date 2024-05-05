@@ -30,7 +30,10 @@ entity component_interconnect is
         component_interconnect_FPGA_out : out component_interconnect_FPGA_output_group;
 
         component_interconnect_data_in : in component_interconnect_data_input_group;
-        component_interconnect_data_out : out component_interconnect_data_output_group
+        component_interconnect_data_out : out component_interconnect_data_output_group;
+
+        bus_to_component_interconnect   : in fpga_interconnect_record;
+        bus_from_component_interconnect : out fpga_interconnect_record
     );
 end entity component_interconnect;
 
@@ -49,6 +52,7 @@ architecture rtl of component_interconnect is
 ------------------------------------------------------------------------
     signal bus_to_communications   : fpga_interconnect_record;
     signal bus_from_communications : fpga_interconnect_record;
+    signal bus_out : fpga_interconnect_record;
 ------------------------------------------------------------------------
 begin
 
@@ -100,11 +104,16 @@ begin
             bus_from_communications => bus_from_communications
         );
 
+        bus_from_component_interconnect <= bus_from_communications;
+
         process(system_clocks.core_clock) is
         begin
             if rising_edge(system_clocks.core_clock) then
-                init_bus(bus_to_communications);
-                connect_read_only_data_to_address(bus_from_communications, bus_to_communications, 100, 44252);
+                init_bus(bus_out);
+                connect_read_only_data_to_address(bus_from_communications, bus_out, 100, 44252);
+
+                bus_to_communications <= bus_out and 
+                                         bus_to_component_interconnect;
             end if;
         end process;
 

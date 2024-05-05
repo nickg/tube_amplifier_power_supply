@@ -6,6 +6,7 @@ library ieee;
     use work.system_control_pkg.all;
     use work.component_interconnect_pkg.all;
     use work.led_driver_pkg.all;
+    use work.fpga_interconnect_pkg.all;
 
 library common_library;
     use common_library.timing_pkg.all;
@@ -53,6 +54,9 @@ architecture rtl of system_control is
                     stop);
     signal st_main_states : t_system_states := init;
 
+    signal bus_from_system_control         : fpga_interconnect_record;
+    signal bus_to_system_control : fpga_interconnect_record;
+
 begin
 ------------------------------------------------------------------------
     u_delay_timer : delay_timer
@@ -69,6 +73,9 @@ begin
     begin
 
 	if rising_edge(system_clocks.core_clock) then
+        init_bus(bus_from_system_control);
+        connect_read_only_data_to_address(bus_to_system_control, bus_from_system_control, 101, 12345);
+
         if system_clocks.pll_lock = '0' then
             led1_color <= led_color_red; 
             led2_color <= led_color_red;
@@ -168,14 +175,18 @@ begin
 	end if;
     end process system_main;
 ------------------------------------------------------------------------
-u_component_interconnect : component_interconnect
+u_component_interconnect : entity work.component_interconnect
 port map(
-        system_clocks,
-        system_control_FPGA_in.component_interconnect_FPGA_in,
-        system_control_FPGA_out.component_interconnect_FPGA_out,
+        system_clocks => system_clocks,
 
-        component_interconnect_data_in,
-        component_interconnect_data_out
+        component_interconnect_FPGA_in  => system_control_FPGA_in.component_interconnect_FPGA_in   ,
+        component_interconnect_FPGA_out => system_control_FPGA_out.component_interconnect_FPGA_out ,
+
+        component_interconnect_data_in  => component_interconnect_data_in  ,
+        component_interconnect_data_out => component_interconnect_data_out ,
+
+        bus_to_component_interconnect   => bus_from_system_control         ,
+        bus_from_component_interconnect => bus_to_system_control 
     );
 ------------------------------------------------------------------------
 

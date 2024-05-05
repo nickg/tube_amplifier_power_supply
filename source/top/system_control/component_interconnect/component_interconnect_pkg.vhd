@@ -33,16 +33,4 @@ type component_interconnect_data_output_group is record
     measurement_interface_data_out : measurement_interface_pkg.measurement_interface_data_output_group;
 end record;
 
-component component_interconnect is
-    port (
-        system_clocks : in work.system_clocks_pkg.system_clock_group;    
-
-        component_interconnect_FPGA_in : in component_interconnect_FPGA_input_group;
-        component_interconnect_FPGA_out : out component_interconnect_FPGA_output_group;
-
-        component_interconnect_data_in : in component_interconnect_data_input_group;
-        component_interconnect_data_out : out component_interconnect_data_output_group
-    );
-end component component_interconnect;
-    
 end package component_interconnect_pkg;
