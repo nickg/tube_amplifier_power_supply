@@ -23,25 +23,27 @@ set_3v3_io dhb_ad_data      J2
 set_3v3_io dhb_ad_clock     L1
 
 
-set_3v3_io po3_led1\[red\]         F14
-set_3v3_io po3_led1\[blue\]        D13
-set_3v3_io po3_led1\[green\]       G14
-set_3v3_io po3_led2\[red\]         H14
-set_3v3_io po3_led2\[blue\]        H13
-set_3v3_io po3_led2\[green\]       J12
-set_3v3_io po3_led3\[red\]         J13
-set_3v3_io po3_led3\[blue\]        J14
-set_3v3_io po3_led3\[green\]       L14
+set_3v3_io rgb_led1\[2\]  F14
+set_3v3_io rgb_led1\[1\]  G14
+set_3v3_io rgb_led1\[0\]  D13
+
+set_3v3_io rgb_led2\[2\]  H14
+set_3v3_io rgb_led2\[1\]  J12
+set_3v3_io rgb_led2\[0\]  H13
+
+set_3v3_io rgb_led3\[2\]  J13
+set_3v3_io rgb_led3\[1\]  L14
+set_3v3_io rgb_led3\[0\]  J14
 
 # pfc gates
 set_3v3_io ac1_switch          G1 
 set_3v3_io ac2_switch          A4 
 
 # dhb gates
-set_3v3_io primary\[high_gate\]     P5 
-set_3v3_io primary\[low_gate\]      P4 
-set_3v3_io secondary\[high_gate\]     N1 
-set_3v3_io secondary\[low_gate\]      M1 
+set_3v3_io dhb_primary_high     P5 
+set_3v3_io dhb_primary_low      P4 
+set_3v3_io dhb_secondary_high   N1 
+set_3v3_io dhb_secondary_low    M1 
 
 # llc gates
 set_3v3_io pri_high      P3 

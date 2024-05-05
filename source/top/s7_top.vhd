@@ -3,8 +3,6 @@ library ieee;
     use ieee.numeric_std.all;
 
     use work.system_clocks_pkg.all;
-    use work.system_control_pkg.system_control_FPGA_output_group;
-    use work.led_driver_pkg.rgb_led;
 
 entity top is
     port(
@@ -25,15 +23,20 @@ entity top is
 
 
         -- dhb io
-        primary   : out work.phase_modulator_pkg.half_bridge;
-        secondary : out work.phase_modulator_pkg.half_bridge;
+        dhb_primary_high : out std_logic;
+        dhb_primary_low  : out std_logic;
+        dhb_secondary_high : out std_logic;
+        dhb_secondary_low  : out std_logic;
 
         dhb_ad_data  : in std_logic;
         dhb_ad_clock : out std_logic;
         dhb_ad_cs    : out std_logic;
 
         -- llc io
-        llc_gates    : out work.llc_modulator_pkg.hb_llc_pwm;
+        pri_high : out std_logic;
+        pri_low  : out std_logic;
+        sync1    : out std_logic;
+        sync2    : out std_logic;
 
         llc_ad_data  : in std_logic;
         llc_ad_clock : out std_logic;
@@ -46,9 +49,9 @@ entity top is
         -- misc
         bypass_relay : out std_logic;
 
-        po3_led1 : out rgb_led;
-        po3_led2 : out rgb_led;
-        po3_led3 : out rgb_led
+        rgb_led1 : out std_logic_vector(2 downto 0);
+        rgb_led2 : out std_logic_vector(2 downto 0);
+        rgb_led3 : out std_logic_vector(2 downto 0)
 
     );
 end top;
@@ -92,13 +95,18 @@ begin
             system_control_FPGA_out.component_interconnect_FPGA_out.measurement_interface_FPGA_out.onboard_ad_control_FPGA_out.adb_mux   => adb_mux   ,
 
 
-            system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.dhb_control_FPGA_out.phase_modulator_FPGA_out.primary   => primary   ,
-            system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.dhb_control_FPGA_out.phase_modulator_FPGA_out.secondary => secondary ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.dhb_control_FPGA_out.phase_modulator_FPGA_out.primary.high_gate => dhb_primary_high     ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.dhb_control_FPGA_out.phase_modulator_FPGA_out.primary.low_gate  => dhb_primary_low      ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.dhb_control_FPGA_out.phase_modulator_FPGA_out.secondary.high_gate => dhb_secondary_high ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.dhb_control_FPGA_out.phase_modulator_FPGA_out.secondary.low_gate  => dhb_secondary_low  ,
 
             system_control_FPGA_out.component_interconnect_FPGA_out.measurement_interface_FPGA_out.dhb_ad_clock => dhb_ad_clock ,
             system_control_FPGA_out.component_interconnect_FPGA_out.measurement_interface_FPGA_out.dhb_ad_cs    => dhb_ad_cs    ,
 
-            system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.llc_control_FPGA_out.llc_modulator_FPGA_out.llc_gates => llc_gates    ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.llc_control_FPGA_out.llc_modulator_FPGA_out.llc_gates.pri_high => pri_high,
+            system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.llc_control_FPGA_out.llc_modulator_FPGA_out.llc_gates.pri_low  => pri_low ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.llc_control_FPGA_out.llc_modulator_FPGA_out.llc_gates.sync1    => sync1   ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.power_supply_control_FPGA_out.llc_control_FPGA_out.llc_modulator_FPGA_out.llc_gates.sync2    => sync2   ,
 
             system_control_FPGA_out.component_interconnect_FPGA_out.measurement_interface_FPGA_out.llc_ad_clock => llc_ad_clock ,
             system_control_FPGA_out.component_interconnect_FPGA_out.measurement_interface_FPGA_out.llc_ad_cs    => llc_ad_cs    ,
@@ -108,9 +116,17 @@ begin
 
             system_control_FPGA_out.bypass_relay => bypass_relay ,
 
-            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led1 => po3_led1 ,
-            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led2 => po3_led2 ,
-            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led3 => po3_led3
+            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led1.red   => rgb_led1(2) ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led1.green => rgb_led1(1) ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led1.blue  => rgb_led1(0) ,
+
+            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led2.red   => rgb_led2(2) ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led2.green => rgb_led2(1) ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led2.blue  => rgb_led2(0) ,
+
+            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led3.red   => rgb_led3(2) ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led3.green => rgb_led3(1) ,
+            system_control_FPGA_out.component_interconnect_FPGA_out.po3_led3.blue  => rgb_led3(0)
         );
 ------------------------------------------------------------------------
 end behavioral;
