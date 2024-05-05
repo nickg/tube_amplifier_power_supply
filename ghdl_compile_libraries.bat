@@ -6,9 +6,8 @@ set source=source/
 ghdl -a --ieee=synopsys --std=08 tubepsu_addresses_pkg.vhd
 
 ghdl -a --ieee=synopsys --std=08 %source%/top/system_clocks_pkg.vhd
-ghdl -a --ieee=synopsys --std=08 %source%/../cyclone_10/source_cl10/cl10_pll_wrapper.vhd
-ghdl -a --ieee=synopsys --std=08 %source%/../cyclone_10/source_cl10/cl10_fifo_control_pkg.vhd
-ghdl -a --ieee=synopsys --std=08 %source%/../cyclone_10/source_cl10/ram_control_pkg.vhd
+ghdl -a --ieee=synopsys --std=08 %source%/../spartan_7/s7_source/s7_specifics.vhd
+ghdl -a --ieee=synopsys --std=08 %source%/../spartan_7/s7_source/s7_pll_wrapper.vhd
 
 rem ghdl -a --ieee=synopsys --std=08 %source%/cyclone_10lp/cl10_specifics.vhd
 

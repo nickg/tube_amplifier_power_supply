@@ -32,16 +32,8 @@ architecture rtl of pfc_modulator is
 
 begin
 
-    clock_crossing : process(core_clock)
-        
-    begin
-        if rising_edge(core_clock) then
-
-        end if; --rising_edge
-    end process clock_crossing;	
 
     pwm_modulator : process(modulator_clock)
-        
     begin
 
         if rising_edge(modulator_clock) then
