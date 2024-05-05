@@ -3,12 +3,6 @@ library ieee;
     use ieee.numeric_std.all;
 
 package llc_modulator_pkg is
-    -- TODO, refactor half bridge to own module
-    type half_bridge is record
-        high_gate : std_logic;
-        low_gate : std_logic;
-    end record;
-
     type hb_llc_pwm is record
         pri_high : std_logic;
         pri_low : std_logic;
