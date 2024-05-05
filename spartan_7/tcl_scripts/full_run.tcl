@@ -39,9 +39,8 @@ add_vhdl_file_to_project $tcl_path/../s7_source/s7_pll_wrapper.vhd
 
 source $source_folder/../list_of_sources.tcl
 
-source $tcl_path/ipgen_main_pll.tcl
-source $tcl_path/ipgen_mult_18x18.tcl
-# source $tcl_path/ipgen_ab_sum_c.tcl
+source $tcl_path/ip_generation/ipgen_main_pll.tcl
+source $tcl_path/ip_generation/ipgen_mult_18x18.tcl
 
 add_vhdl_file_to_project $source_folder/top/s7_top.vhd
 set_property top top [current_fileset]
@@ -125,7 +124,7 @@ set_property CONFIG_VOLTAGE 3.3 [current_design]
 set_property BITSTREAM.Config.SPI_BUSWIDTH 4 [current_design]
 set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
 
-write_bitstream -force hvhdl_example_project_ram_image.bit
+write_bitstream -force tube_power.bit
 write_cfgmem -force  -format mcs -size 2 -interface SPIx4        \
-    -loadbit "up 0x0 hvhdl_example_project_ram_image.bit" \
-    -file "hvhdl_example_project_flash_image.mcs"
+    -loadbit "up 0x0 tube_power.bit" \
+    -file "tube_power.mcs"
