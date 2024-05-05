@@ -3,7 +3,7 @@ library ieee;
     use ieee.numeric_std.all;
 
     use work.system_clocks_pkg.all;
-    use work.system_control_pkg.all;
+    use work.system_control_pkg.system_control_FPGA_output_group;
 
 entity top is
     port(
@@ -20,15 +20,9 @@ end top;
 architecture behavioral of top is
 
     signal system_clocks : system_clock_group;
-    signal system_control_FPGA_in  : system_control_FPGA_input_group;
 
 
 begin
-    system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.dhb_ad_data <= dhb_ad_data;
-    system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.llc_ad_data <= llc_ad_data;
-    system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.onboard_ad_control_FPGA_in.ada_data <= ada_data;
-    system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.onboard_ad_control_FPGA_in.adb_data <= adb_data;
-    system_control_FPGA_in.component_interconnect_FPGA_in.pi_uart_rx_serial <= pi_uart_rx_serial;
 ------------------------------------------------------------------------
     clocks : entity work.pll_wrapper
 	port map
@@ -44,8 +38,13 @@ begin
     u_system_control : entity work.system_control
         port map(
             system_clocks,
-            system_control_FPGA_in,
-            system_control_FPGA_out
+            system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.dhb_ad_data => dhb_ad_data,
+            system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.llc_ad_data => llc_ad_data,
+            system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.onboard_ad_control_FPGA_in.ada_data => ada_data,
+            system_control_FPGA_in.component_interconnect_FPGA_in.measurement_interface_FPGA_in.onboard_ad_control_FPGA_in.adb_data => adb_data,
+            system_control_FPGA_in.component_interconnect_FPGA_in.pi_uart_rx_serial => pi_uart_rx_serial,
+
+            system_control_FPGA_out => system_control_FPGA_out
         );
 ------------------------------------------------------------------------
 end behavioral;
