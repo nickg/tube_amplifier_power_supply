@@ -56,18 +56,18 @@ proc add_vhdl_file_to_library {vhdl_file library} {
 }
 source $tube_psu_v5_dir/list_of_sources.tcl
 source $tube_psu_v5_dir/fpga_communication_sources.tcl
-add_vhdl_file_to_library $tube_psu_v5_dir/source/top/ecp5_top.vhd
+
+add_vhdl_file_to_project $source_folder/top/ecp5_top.vhd
 
 prj_src add -exclude $tube_psu_v5_dir/lfe5u/constraints/tubepsu_constraints.lpf
 prj_src enable $tube_psu_v5_dir/lfe5u/constraints/tubepsu_constraints.lpf
 prj_src enable $tube_psu_v5_dir/lfe5u/constraints/timing.ldc
 prj_src remove tube_psu_v5.lpf
 file delete -force tube_psu_v5.lpf
-# prj_src -enable $tube_psu_v5_dir/lfe5u/constraints/tubepsu_constraints.lpf
-# prj_run Synthesis -impl impl1
-# prj_run Translate -impl impl1
-# prj_run Map -impl impl1
-# prj_run PAR -impl impl1
-# prj_run Export -impl impl1 -task Bitgen
-# prj_run Export -impl impl1 -task Promgen
+prj_run Synthesis -impl impl1
+prj_run Translate -impl impl1
+prj_run Map -impl impl1
+prj_run PAR -impl impl1
+prj_run Export -impl impl1 -task Bitgen
+prj_run Export -impl impl1 -task Promgen
 prj_project save
