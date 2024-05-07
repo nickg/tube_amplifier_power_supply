@@ -30,6 +30,8 @@ architecture rtl of pfc_modulator is
     signal shift_register : std_logic_vector(1 downto 0); 
     signal shift_register2 : std_logic_vector(2 downto 0); 
 
+    signal sw_buffer : std_logic_vector(1 downto 0);
+
 begin
 
 
@@ -50,18 +52,17 @@ begin
 
             pfc_carrier1 <= pfc_carrier;
             if pfc_carrier1 < jee then
-                pfc_modulator_FPGA_out.ac1_switch <= '1';
-                pfc_modulator_FPGA_out.ac2_switch <= '1';
+                sw_buffer <= "11";
             else
-                pfc_modulator_FPGA_out.ac1_switch <= '0';
-                pfc_modulator_FPGA_out.ac2_switch <= '0';
+                sw_buffer <= "00";
             end if;
 
             shift_register <= shift_register(0) & pfc_modulator_data_in.pfc_is_enabled;
             if shift_register(1) = '0' then
-                pfc_modulator_FPGA_out.ac1_switch <= '0';
-                pfc_modulator_FPGA_out.ac2_switch <= '0';
+                sw_buffer <= "00";
             end if;
+            pfc_modulator_FPGA_out.ac1_switch <= sw_buffer(0);
+            pfc_modulator_FPGA_out.ac2_switch <= sw_buffer(1);
 
         end if; --rising_edge
     end process pwm_modulator;	

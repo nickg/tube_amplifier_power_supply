@@ -50,6 +50,8 @@ rem
 ghdl -a --ieee=synopsys --std=08 %source%/top/system_control/component_interconnect/component_interconnect_pkg.vhd
 ghdl -a --ieee=synopsys --std=08 %source%/top/system_control/system_control_pkg.vhd
 
+ghdl -a --ieee=synopsys --std=08 %source%/hVHDL_dynamic_model_verification_library/simulator_utilities/write_pkg.vhd
+
 rem ghdl -a --ieee=synopsys --std=08 %source%/ecp5/ecp5_pll_wrapper.vhd
 rem ghdl -a --ieee=synopsys --std=08 %source%/spartan_7/s7_specifics.vhd
 rem ghdl -a --ieee=synopsys --std=08 %source%/spartan_7/s7_adc_wrapper.vhd
