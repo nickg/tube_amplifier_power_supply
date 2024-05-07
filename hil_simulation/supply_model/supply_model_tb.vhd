@@ -84,7 +84,7 @@ begin
         end calculate_lc;
     ------------------------------
         type lc_array is array (integer range 1 to 4) of lc_record;
-        variable k1_lc : lc_array;
+        variable k_lc : lc_array;
 
         file file_handler : text open write_mode is "supply_model_tb.dat";
     begin
@@ -96,18 +96,22 @@ begin
 
             case sequencer is
                 when 0 =>
-                    k1_lc(1) := calculate_lc((current, voltage),l, c, r, 0.00, uin, load);
-                    ik(1) := k1_lc(1).current/2.0;
-                    uk(1) := k1_lc(1).voltage/2.0;
+                    k_lc(1) := calculate_lc((current, voltage),l/2.0, c/2.0, r, 0.00, uin, load);
+                    ik(1) := k_lc(1).current;
+                    uk(1) := k_lc(1).voltage;
 
-                    ik(2) := (uin - (voltage + uk(1)) - (current + ik(1))*r)*l/2.0;
-                    uk(2) := ((current - load) + ik(1))*c/2.0;
+                    k_lc(2) := calculate_lc((current + k_lc(1).current, voltage + k_lc(1).voltage),l/2.0, c/2.0, r, 0.00, uin, load);
 
-                    ik(3) := (uin - (voltage + uk(2)) - (current + ik(2))*r)*l;
-                    uk(3) := ((current - load) + ik(2))*c;
+                    ik(2) := k_lc(2).current;
+                    uk(2) := k_lc(2).voltage;
 
-                    ik(4) := (uin - (voltage + uk(3)) - (current + ik(3))*r)*l;
-                    uk(4) := ((current - load) + ik(3))*c;
+                    k_lc(3) := calculate_lc((current + k_lc(2).current, voltage + k_lc(2).voltage),l, c, r, 0.00, uin, load);
+                    ik(3) := k_lc(3).current;
+                    uk(3) := k_lc(3).voltage;
+
+                    k_lc(4) := calculate_lc((current + k_lc(3).current, voltage + k_lc(3).voltage),l, c, r, 0.00, uin, load);
+                    ik(4) := k_lc(4).current;
+                    uk(4) := k_lc(4).voltage;
 
                     current <= current + 1.0/6.0 * (ik(1) * 2.0 + 4.0 * ik(2) + 2.0 * ik(3) + ik(4));
                     voltage <= voltage + 1.0/6.0 * (uk(1) * 2.0 + 4.0 * uk(2) + 2.0 * uk(3) + uk(4));
