@@ -16,7 +16,6 @@ end;
 architecture vunit_simulation of supply_model_tb is
 
     constant clock_period      : time    := 1 ns;
-    
     signal simulator_clock     : std_logic := '0';
     signal simulation_counter  : natural   := 0;
     -----------------------------------
@@ -56,6 +55,37 @@ begin
         variable ik : realarray(1 to 4) := (others => 0.0);
         variable uk : realarray(1 to 4) := (others => 0.0);
 
+        type lc_record is record
+            current : real;
+            voltage : real;
+        end record;
+
+    ------------------------------
+        function calculate_lc
+        (
+            lc : lc_record;
+            l_gain : real;
+            c_gain : real;
+            r_l : real;
+            r_load : real;
+            input_voltage : real;
+            load_current : real
+        )
+        return lc_record
+        is
+            variable retval : lc_record;
+        begin
+
+            retval.current := ((input_voltage - lc.voltage) - r_l*lc.current + r_load * load_current) * l_gain;
+            retval.voltage := (lc.current - load_current)*c_gain;
+
+            return retval;
+            
+        end calculate_lc;
+    ------------------------------
+        type lc_array is array (integer range 1 to 4) of lc_record;
+        variable k1_lc : lc_array;
+
         file file_handler : text open write_mode is "supply_model_tb.dat";
     begin
         if rising_edge(simulator_clock) then
@@ -66,8 +96,9 @@ begin
 
             case sequencer is
                 when 0 =>
-                    ik(1) := (uin - voltage - current*r)*l/2.0;
-                    uk(1) := (current - load)*c/2.0;
+                    k1_lc(1) := calculate_lc((current, voltage),l, c, r, 0.00, uin, load);
+                    ik(1) := k1_lc(1).current/2.0;
+                    uk(1) := k1_lc(1).voltage/2.0;
 
                     ik(2) := (uin - (voltage + uk(1)) - (current + ik(1))*r)*l/2.0;
                     uk(2) := ((current - load) + ik(1))*c/2.0;
