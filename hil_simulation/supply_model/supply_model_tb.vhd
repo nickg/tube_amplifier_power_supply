@@ -21,17 +21,25 @@ architecture vunit_simulation of supply_model_tb is
     -----------------------------------
     -- simulation specific signals ----
 
-    signal realtime : real := 0.0;
-    signal timestep : real := 1.0e-6;
 
     signal sequencer : natural := 1;
 
-    signal current : real := 0.0;
-    signal voltage : real := 0.0;
-    signal r       : real := 100.0e-3;
-    signal l       : real := timestep/50.0e-6;
-    signal c       : real := timestep/100.0e-6;
-    signal uin     : real := 1.0;
+    type lc_record is record
+        current : real;
+        voltage : real;
+    end record;
+
+    signal lc1 : lc_record := ((others => 0.0));
+    signal lc2 : lc_record := ((others => 0.0));
+    signal lc3 : lc_record := ((others => 0.0));
+
+
+    signal realtime : real := 0.0;
+    signal timestep : real := 1.0e-6;
+    signal r        : real := 50.0e-3;
+    signal l        : real := timestep/50.0e-6;
+    signal c        : real := timestep/100.0e-6;
+    signal uin      : real := 1.0;
 
     signal load : real := 0.0;
 
@@ -51,16 +59,8 @@ begin
 
     stimulus : process(simulator_clock)
 
-        type realarray is array (natural range <>) of real;
-        variable ik : realarray(1 to 4) := (others => 0.0);
-        variable uk : realarray(1 to 4) := (others => 0.0);
-
-        type lc_record is record
-            current : real;
-            voltage : real;
-        end record;
-
     ------------------------------
+        type lc_array is array (integer range 1 to 4) of lc_record;
         function calculate_lc
         (
             lc : lc_record;
@@ -82,9 +82,35 @@ begin
             return retval;
             
         end calculate_lc;
+
+        function rk4_lc
+        (
+            lc     : lc_record;
+            l_gain : real;
+            c_gain : real;
+            r_l    : real;
+            r_load : real;
+            input_voltage : real;
+            load_current  : real
+        )
+        return  lc_record
+        is
+            variable k_lc : lc_array;
+            variable retval : lc_record;
+        begin
+            k_lc(1) := calculate_lc((lc.current                   , lc.voltage)                   , l_gain/2.0 , c_gain/2.0 , r_l , r_load , input_voltage , load_current);
+            k_lc(2) := calculate_lc((lc.current + k_lc(1).current , lc.voltage + k_lc(1).voltage) , l_gain/2.0 , c_gain/2.0 , r_l , r_load , input_voltage , load_current);
+            k_lc(3) := calculate_lc((lc.current + k_lc(2).current , lc.voltage + k_lc(2).voltage) , l_gain     , c_gain     , r_l , r_load , input_voltage , load_current);
+            k_lc(4) := calculate_lc((lc.current + k_lc(3).current , lc.voltage + k_lc(3).voltage) , l_gain     , c_gain     , r_l , r_load , input_voltage , load_current);
+
+            retval.current := lc.current + 1.0/6.0 * (k_lc(1).current * 2.0 + 4.0 * k_lc(2).current + 2.0 * k_lc(3).current + k_lc(4).current);
+            retval.voltage := lc.voltage + 1.0/6.0 * (k_lc(1).voltage * 2.0 + 4.0 * k_lc(2).voltage + 2.0 * k_lc(3).voltage + k_lc(4).voltage);
+
+            return retval;
+            
+        end rk4_lc;
+
     ------------------------------
-        type lc_array is array (integer range 1 to 4) of lc_record;
-        variable k_lc : lc_array;
 
         file file_handler : text open write_mode is "supply_model_tb.dat";
     begin
@@ -96,29 +122,12 @@ begin
 
             case sequencer is
                 when 0 =>
-                    k_lc(1) := calculate_lc((current, voltage),l/2.0, c/2.0, r, 0.00, uin, load);
-                    ik(1) := k_lc(1).current;
-                    uk(1) := k_lc(1).voltage;
 
-                    k_lc(2) := calculate_lc((current + k_lc(1).current, voltage + k_lc(1).voltage),l/2.0, c/2.0, r, 0.00, uin, load);
+                    lc1 <= rk4_lc(lc1 , l , c , r , 0.00 , uin         , lc2.current);
+                    lc2 <= rk4_lc(lc2 , l , c , r , 0.00 , lc1.voltage , load);
 
-                    ik(2) := k_lc(2).current;
-                    uk(2) := k_lc(2).voltage;
-
-                    k_lc(3) := calculate_lc((current + k_lc(2).current, voltage + k_lc(2).voltage),l, c, r, 0.00, uin, load);
-                    ik(3) := k_lc(3).current;
-                    uk(3) := k_lc(3).voltage;
-
-                    k_lc(4) := calculate_lc((current + k_lc(3).current, voltage + k_lc(3).voltage),l, c, r, 0.00, uin, load);
-                    ik(4) := k_lc(4).current;
-                    uk(4) := k_lc(4).voltage;
-
-                    current <= current + 1.0/6.0 * (ik(1) * 2.0 + 4.0 * ik(2) + 2.0 * ik(3) + ik(4));
-                    voltage <= voltage + 1.0/6.0 * (uk(1) * 2.0 + 4.0 * uk(2) + 2.0 * uk(3) + uk(4));
-
-                when 1 => 
                     realtime <= realtime + timestep;
-                    write_to(file_handler,(realtime, voltage, current, load));
+                    write_to(file_handler,(realtime, lc2.voltage, lc2.current, load));
 
                 when others => --do nothing
             end case;
