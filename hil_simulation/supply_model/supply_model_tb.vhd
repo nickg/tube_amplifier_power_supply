@@ -34,13 +34,15 @@ architecture vunit_simulation of supply_model_tb is
     signal c       : real := timestep/100.0e-6;
     signal uin     : real := 1.0;
 
+    signal load : real := 0.0;
+
 begin
 
 ------------------------------------------------------------------------
     simtime : process
     begin
         test_runner_setup(runner, runner_cfg);
-        wait until realtime >= 10.0e-3;
+        wait until realtime >= 15.0e-3;
         test_runner_cleanup(runner); -- Simulation ends here
         wait;
     end process simtime;	
@@ -59,38 +61,45 @@ begin
         if rising_edge(simulator_clock) then
             simulation_counter <= simulation_counter + 1;
             if simulation_counter = 0 then
-                init_simfile(file_handler, ("time", "volt", "curr"));
+                init_simfile(file_handler, ("time", "volt", "curr", "load"));
             end if;
 
             case sequencer is
                 when 0 =>
                     ik(1) := (uin - voltage - current*r)*l/2.0;
-                    uk(1) := current*c/2.0;
+                    uk(1) := (current - load)*c/2.0;
 
                     ik(2) := (uin - (voltage + uk(1)) - (current + ik(1))*r)*l/2.0;
-                    uk(2) := (current + ik(1))*c/2.0;
+                    uk(2) := ((current - load) + ik(1))*c/2.0;
 
                     ik(3) := (uin - (voltage + uk(2)) - (current + ik(2))*r)*l;
-                    uk(3) := (current + ik(2))*c;
+                    uk(3) := ((current - load) + ik(2))*c;
 
                     ik(4) := (uin - (voltage + uk(3)) - (current + ik(3))*r)*l;
-                    uk(4) := (current + ik(3))*c;
+                    uk(4) := ((current - load) + ik(3))*c;
 
                     current <= current + 1.0/6.0 * (ik(1) * 2.0 + 4.0 * ik(2) + 2.0 * ik(3) + ik(4));
                     voltage <= voltage + 1.0/6.0 * (uk(1) * 2.0 + 4.0 * uk(2) + 2.0 * uk(3) + uk(4));
 
                 when 1 => 
                     realtime <= realtime + timestep;
-                    write_to(file_handler,(realtime, voltage, current));
+                    write_to(file_handler,(realtime, voltage, current, load));
 
                 when others => --do nothing
             end case;
+
+            if realtime > 5.0e-3 then
+                load <= 1.0;
+            end if;
+
+            if realtime > 10.0e-3 then
+                uin <= 2.0;
+            end if;
 
             sequencer <= sequencer + 1;
             if sequencer > 0 then
                 sequencer <= 0;
             end if;
-
 
         end if; -- rising_edge
     end process stimulus;	
