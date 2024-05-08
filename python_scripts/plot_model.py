@@ -10,6 +10,7 @@ vhdl_data = pd.read_csv(path_to_this_file + '/../vunit_out/supply_model_tb.dat',
 vhdl_data.plot(ax=axT, x="time", y="volt", label="voltage")
 vhdl_data.plot(ax=axB, x="time", y="curr", label="current")
 vhdl_data.plot(ax=axB, x="time", y="load", label="load")
+vhdl_data.plot(ax=axB, x="time", y="dcur", label="dc link current")
 
 plt.show()
 plt.close('all')
