@@ -39,7 +39,7 @@ architecture vunit_simulation of supply_model_tb is
     signal load_r  : real := 100.0;
 
     signal r        : real := 150.0e-3;
-    signal l        : real := timestep/25.0e-6;
+    signal l        : real := timestep/15.0e-6;
     signal c        : real := timestep/1.0e-6;
     signal uin      : real := 100.0;
 
@@ -123,7 +123,7 @@ begin
             end case;
 
             -- if realtime > 15.0e-3 then duty   <= 0.4; end if;
-            -- if realtime > 30.0e-3 then duty   <= 0.6; end if;
+            if realtime > 30.0e-3 then duty   <= 0.4; end if;
             -- if realtime > 40.0e-3 then load_r <= 50.0; end if;
             -- if realtime > 60.0e-3 then uin    <= 0.6; end if;
 
