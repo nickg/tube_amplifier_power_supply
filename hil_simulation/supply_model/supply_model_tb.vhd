@@ -21,7 +21,7 @@ architecture vunit_simulation of supply_model_tb is
     -----------------------------------
     -- simulation specific signals ----
     signal realtime : real := 0.0;
-    signal timestep : real := 0.5e-6;
+    signal timestep : real := 1.0e-6;
 
     signal sequencer : natural := 1;
 
@@ -32,15 +32,15 @@ architecture vunit_simulation of supply_model_tb is
 
     signal lc1 : lc_record := ((others => 0.0));
     signal lc2 : lc_record := ((others => 0.0));
-    signal i3 : real       := -1.0;
+    signal i3 : real       := 0.0;
     signal dc_link : real  := 150.0;
 
     signal duty    : real := 0.5;
     signal load_r  : real := 100.0;
 
-    signal r        : real := 50.0e-3;
-    signal l        : real := timestep/50.0e-6;
-    signal c        : real := timestep/5.0e-6;
+    signal r        : real := 150.0e-3;
+    signal l        : real := timestep/25.0e-6;
+    signal c        : real := timestep/1.0e-6;
     signal uin      : real := 100.0;
 
     signal load : real := 0.0;
