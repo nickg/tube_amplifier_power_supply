@@ -93,21 +93,36 @@ begin
             
         end calculate_lc;
     ------------------------------
-        type pfc_array is array (integer range 1 to 2) of pfc_record;
-        variable k_pfc : pfc_array;
-
-        file file_handler : text open write_mode is "supply_model_tb.dat";
-
-        function calculate_pfc
+        impure function calculate_pfc
         (
-            self : pfc_record
+            self : pfc_record;
+            l_gain : real;
+            c_gain : real;
+            r_l : real;
+            r_load : real;
+            input_voltage : real;
+            load_current : real
         )
         return pfc_record
         is
             variable retval : pfc_record;
         begin
+
+            retval.lc1     := calculate_lc((pfc.lc1.current , pfc.lc1.voltage) , l , c , r , 0.0 , uin         , pfc.lc2.current);
+            retval.lc2     := calculate_lc((pfc.lc2.current , pfc.lc2.voltage) , l , c , r , 0.0 , pfc.lc1.voltage , duty*pfc.i3);
+            retval.i3      := (pfc.lc2.voltage - pfc.dc_link*duty)*timestep/1.0e-3;
+            retval.dc_link := (duty*pfc.i3 - pfc.dc_link/load_r)*timestep/1.0e-3;
+
+            return retval;
+
             return retval;
         end calculate_pfc;
+    ------------------------------
+        type pfc_array is array (integer range 1 to 2) of pfc_record;
+        variable k_pfc : pfc_array;
+
+        file file_handler : text open write_mode is "supply_model_tb.dat";
+
     begin
         if rising_edge(simulator_clock) then
             simulation_counter <= simulation_counter + 1;
@@ -117,14 +132,14 @@ begin
 
             case sequencer is
                 when 0 =>
-                    k_pfc(1).lc1      := calculate_lc((pfc.lc1.current , pfc.lc1.voltage) , l , c , r , 0.0 , uin         , pfc.lc2.current);
+                    k_pfc(1).lc1     := calculate_lc((pfc.lc1.current , pfc.lc1.voltage) , l , c , r , 0.0 , uin         , pfc.lc2.current);
                     k_pfc(1).lc2     := calculate_lc((pfc.lc2.current , pfc.lc2.voltage) , l , c , r , 0.0 , pfc.lc1.voltage , duty*pfc.i3);
                     k_pfc(1).i3      := (pfc.lc2.voltage - pfc.dc_link*duty)*timestep/1.0e-3;
                     k_pfc(1).dc_link := (duty*pfc.i3 - pfc.dc_link/load_r)*timestep/1.0e-3;
+                    -- k_pfc(1) := calculate_pfc(
 
-                    k_pfc(2).lc1      := calculate_lc((pfc.lc1.current + k_pfc(1).lc1.current/2.0  , pfc.lc1.voltage + k_pfc(1).lc1.voltage/2.0)  , l , c , r , 0.0 , uin                               , pfc.lc2.current + k_pfc(1).lc2.current/2.0);
+                    k_pfc(2).lc1     := calculate_lc((pfc.lc1.current + k_pfc(1).lc1.current/2.0  , pfc.lc1.voltage + k_pfc(1).lc1.voltage/2.0)  , l , c , r , 0.0 , uin                               , pfc.lc2.current + k_pfc(1).lc2.current/2.0);
                     k_pfc(2).lc2     := calculate_lc((pfc.lc2.current + k_pfc(1).lc2.current/2.0 , pfc.lc2.voltage + k_pfc(1).lc2.voltage/2.0) , l , c , r , 0.0 , pfc.lc1.voltage + k_pfc(1).lc1.voltage/2.0 , duty*(pfc.i3 + k_pfc(1).i3/2.0));
-
                     k_pfc(2).i3      := ((pfc.lc2.voltage + k_pfc(1).lc2.voltage/2.0) - (pfc.dc_link + k_pfc(1).dc_link)*duty)*timestep/1.0e-3;
                     k_pfc(2).dc_link := (duty*(pfc.i3 + k_pfc(1).i3/2.0) - (pfc.dc_link + k_pfc(1).dc_link/2.0)/load_r)*timestep/1.0e-3;
 
