@@ -30,10 +30,18 @@ architecture vunit_simulation of supply_model_tb is
         voltage : real;
     end record;
 
-    signal lc1 : lc_record := ((others => 0.0));
-    signal lc2 : lc_record := ((others => 0.0));
-    signal i3 : real       := 0.0;
-    signal dc_link : real  := 150.0;
+    type pfc_record is record
+        lc1     : lc_record;
+        lc2     : lc_record;
+        i3      : real;
+        dc_link : real;
+    end record;
+
+    signal pfc : pfc_record := (
+        (others => 0.0) ,
+        (others => 0.0) ,
+        0.0             ,
+        150.0);
 
     signal duty    : real := 0.5;
     signal load_r  : real := 100.0;
@@ -91,6 +99,17 @@ begin
         variable k_dc_link : real_vector(1 to 2);
 
         file file_handler : text open write_mode is "supply_model_tb.dat";
+
+        function calculate_pfc
+        (
+            self : pfc_record
+        )
+        return pfc_record
+        is
+            variable retval : pfc_record;
+        begin
+            return retval;
+        end calculate_pfc;
     begin
         if rising_edge(simulator_clock) then
             simulation_counter <= simulation_counter + 1;
@@ -100,24 +119,24 @@ begin
 
             case sequencer is
                 when 0 =>
-                    k_lc(1)      := calculate_lc((lc1.current , lc1.voltage) , l , c , r , 0.0 , uin         , lc2.current);
-                    k_lc2(1)     := calculate_lc((lc2.current , lc2.voltage) , l , c , r , 0.0 , lc1.voltage , duty*i3);
-                    k_i3(1)      := (lc2.voltage - dc_link*duty)*timestep/1.0e-3;
-                    k_dc_link(1) := (duty*i3 - dc_link/load_r)*timestep/1.0e-3;
+                    k_lc(1)      := calculate_lc((pfc.lc1.current , pfc.lc1.voltage) , l , c , r , 0.0 , uin         , pfc.lc2.current);
+                    k_lc2(1)     := calculate_lc((pfc.lc2.current , pfc.lc2.voltage) , l , c , r , 0.0 , pfc.lc1.voltage , duty*pfc.i3);
+                    k_i3(1)      := (pfc.lc2.voltage - pfc.dc_link*duty)*timestep/1.0e-3;
+                    k_dc_link(1) := (duty*pfc.i3 - pfc.dc_link/load_r)*timestep/1.0e-3;
 
-                    k_lc(2)      := calculate_lc((lc1.current + k_lc(1).current/2.0  , lc1.voltage + k_lc(1).voltage/2.0)  , l , c , r , 0.0 , uin                               , lc2.current + k_lc2(1).current/2.0);
-                    k_lc2(2)     := calculate_lc((lc2.current + k_lc2(1).current/2.0 , lc2.voltage + k_lc2(1).voltage/2.0) , l , c , r , 0.0 , lc1.voltage + k_lc(1).voltage/2.0 , duty*(i3 + k_i3(1)/2.0));
+                    k_lc(2)      := calculate_lc((pfc.lc1.current + k_lc(1).current/2.0  , pfc.lc1.voltage + k_lc(1).voltage/2.0)  , l , c , r , 0.0 , uin                               , pfc.lc2.current + k_lc2(1).current/2.0);
+                    k_lc2(2)     := calculate_lc((pfc.lc2.current + k_lc2(1).current/2.0 , pfc.lc2.voltage + k_lc2(1).voltage/2.0) , l , c , r , 0.0 , pfc.lc1.voltage + k_lc(1).voltage/2.0 , duty*(pfc.i3 + k_i3(1)/2.0));
 
-                    k_i3(2)      := ((lc2.voltage + k_lc2(1).voltage/2.0) - (dc_link + k_dc_link(1))*duty)*timestep/1.0e-3;
-                    k_dc_link(2) := (duty*(i3 + k_i3(1)/2.0) - (dc_link + k_dc_link(1)/2.0)/load_r)*timestep/1.0e-3;
+                    k_i3(2)      := ((pfc.lc2.voltage + k_lc2(1).voltage/2.0) - (pfc.dc_link + k_dc_link(1))*duty)*timestep/1.0e-3;
+                    k_dc_link(2) := (duty*(pfc.i3 + k_i3(1)/2.0) - (pfc.dc_link + k_dc_link(1)/2.0)/load_r)*timestep/1.0e-3;
 
-                    lc1     <= (lc1.current + k_lc(2).current  , lc1.voltage + k_lc(2).voltage);
-                    lc2     <= (lc2.current + k_lc2(2).current , lc2.voltage + k_lc2(2).voltage);
-                    i3      <= i3 + k_i3(2);
-                    dc_link <= dc_link + k_dc_link(2);
+                    pfc.lc1     <= (pfc.lc1.current + k_lc(2).current  , pfc.lc1.voltage + k_lc(2).voltage);
+                    pfc.lc2     <= (pfc.lc2.current + k_lc2(2).current , pfc.lc2.voltage + k_lc2(2).voltage);
+                    pfc.i3      <= pfc.i3 + k_i3(2);
+                    pfc.dc_link <= pfc.dc_link + k_dc_link(2);
 
                     realtime <= realtime + timestep;
-                    write_to(file_handler,(realtime, dc_link, lc2.current, dc_link/load_r, -duty*i3));
+                    write_to(file_handler,(realtime, pfc.dc_link, pfc.lc2.current, pfc.dc_link/load_r, -duty*pfc.i3));
 
                 when others => --do nothing
             end case;
