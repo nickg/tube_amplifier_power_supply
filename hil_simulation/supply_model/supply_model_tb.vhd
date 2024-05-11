@@ -59,9 +59,6 @@ begin
 ------------------------------------------------------------------------
 
     stimulus : process(simulator_clock)
-
-    ------------------------------
-        type lc_array is array (integer range 1 to 4) of lc_record;
     ------------------------------
     ------------------------------
         type pfc_array is array (natural range <>) of pfc_record;
@@ -85,16 +82,41 @@ begin
         return pfc_record
         is
             variable retval : pfc_record := self;
+            variable sum : real_vector(0 to 7);
+            variable mult_add : real_vector(0 to 7);
+            variable mult : real_vector(0 to 9);
         begin
 
-            retval.lc1.current := ((input_voltage - self.lc1.voltage) - r_l*self.lc1.current + r_load * 0.0) * l_gain;
-            retval.lc1.voltage := (self.lc1.current - self.lc2.current)*c_gain;
+            sum(1) := self.lc1.current - self.lc2.current;
+            sum(3) := self.lc2.current - self.i3;
+            sum(0) := input_voltage - self.lc1.voltage;
+            sum(2) := self.lc1.voltage - self.lc2.voltage;
+            mult(0) := - r_l*self.lc1.current;
+            mult(1) := r_load * self.lc2.current;
+            mult(2) := - r_l*self.lc2.current;
+            mult(3) := r_load * self.i3;
+            mult_add(0) := self.lc2.voltage - self.dc_link*duty;
+            mult_add(1) := duty*self.i3 - load_current;
 
-            retval.lc2.current := ((self.lc1.voltage - self.lc2.voltage) - r_l*self.lc2.current + r_load * 0.0) * l_gain;
-            retval.lc2.voltage := (self.lc2.current - self.i3)*c_gain;
+            mult(4) := (sum(1))*c_gain;
+            mult(5) := (sum(3))*c_gain;
+            mult(6) := sum(0)*l_gain;
+            mult(7) := sum(2) * l_gain;
+            sum(4) := mult(0) + mult(1);
+            sum(5) := mult(2) + mult(3);
+            mult_add(2) := mult(6) + (sum(4)) * l_gain;
+            mult_add(3) := mult(7) + (sum(5)) * l_gain;
+            mult(8) := mult_add(0)*pri_l_gain;
+            mult(9) := mult_add(1)*dc_link_gain;
 
-            retval.i3      := (self.lc2.voltage - self.dc_link*duty)*pri_l_gain;
-            retval.dc_link := (duty*self.i3 - load_current)*dc_link_gain;
+            retval.lc1.current := mult_add(2);
+            retval.lc1.voltage := mult(4);
+
+            retval.lc2.current := mult_add(3);
+            retval.lc2.voltage := mult(5);
+
+            retval.i3      := mult(8);
+            retval.dc_link := mult(9);
 
             return retval;
         end calculate_pfc;
