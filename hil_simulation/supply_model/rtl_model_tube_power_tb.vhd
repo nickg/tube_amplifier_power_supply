@@ -10,13 +10,24 @@ context vunit_lib.vunit_context;
     use work.write_pkg.all;
     use work.pfc_model_pkg.all;
 
-entity supply_model_tb is
+    use work.microinstruction_pkg.all;
+    use work.multi_port_ram_pkg.all;
+    use work.simple_processor_pkg.all;
+    use work.processor_configuration_pkg.all;
+    use work.float_alu_pkg.all;
+    use work.float_type_definitions_pkg.all;
+    use work.float_to_real_conversions_pkg.all;
+
+    use work.memory_processing_pkg.all;
+    use work.microinstruction_pkg.all;
+
+entity rtl_model_tube_power_tb is
   generic (runner_cfg : string);
 end;
 
-architecture vunit_simulation of supply_model_tb is
+architecture vunit_simulation of rtl_model_tube_power_tb is
 
-    constant clock_period      : time    := 1 ns;
+    constant clock_period      : time      := 1 ns;
     signal simulator_clock     : std_logic := '0';
     signal simulation_counter  : natural   := 0;
     -----------------------------------
@@ -30,19 +41,65 @@ architecture vunit_simulation of supply_model_tb is
         (others => 0.0) ,
         (others => 0.0) ,
         0.0             ,
-        150.0);
+        100.0);
 
     signal duty   : real := 0.5;
-    signal load_r : real := 100.0;
+    signal load_r : real := 400.0**2/50.0;
 
-    signal r            : real := 150.0e-3;
+    signal r            : real := 250.0e-3;
     signal l            : real := timestep/5.5e-6;
     signal c            : real := timestep/0.68e-6;
-    signal dc_link_gain : real := timestep/1.0e-3;
-    signal pri_l_gain   : real := timestep/3.0e-3;
+    signal dc_link_gain : real := timestep/68.0e-6 * 4.0;
+    signal pri_l_gain   : real := timestep/500.0e-6;
     signal uin          : real := 100.0;
 
-    signal load : real := 0.0;
+    signal mcu                     : simple_processor_record := init_processor;
+    signal ram_read_instruction_in  : ram_read_in_record  := (0, '0');
+    signal ram_read_instruction_out : ram_read_out_record ;
+    signal ram_read_data_in         : ram_read_in_record  := (0, '0');
+    signal ram_read_data_out        : ram_read_out_record ;
+    signal ram_read_2_data_in       : ram_read_in_record  := (0, '0');
+    signal ram_read_2_data_out      : ram_read_out_record ;
+    signal ram_read_3_data_in       : ram_read_in_record  := (0, '0');
+    signal ram_read_3_data_out      : ram_read_out_record ;
+    signal ram_write_port           : ram_write_in_record ;
+
+    signal float_alu : float_alu_record := init_float_alu;
+
+
+    function pfc_model_program
+    (
+        pfc_address        : natural;
+        l_gain_addr        : natural ;
+        c_gain_addr        : natural ;
+        dc_link_gain_addr  : natural ;
+        pri_l_gain_addr    : natural ;
+        r_l_addr           : natural ;
+        r_load_addr        : natural ;
+        input_voltage_addr : natural ;
+        load_current_addr  : natural ;
+        duty_addr          : real range -1.0 to 1.0
+    )
+    return ram_array
+    is
+        variable retval : ram_array := (others => (others => '0'));
+        variable sum_addr      : integer_vector (0 to 5) := (0,1,2,3,4,5);
+        variable mult_add_addr : integer_vector (0 to 3) := (7,8,9,10);
+        variable mult_addr     : integer_vector (0 to 9) := (11,12,13,14,15,16,17,18,19,20);
+
+        -- constant program : program_array :=(
+        -- pipelined_block(
+        --     program_array'(
+        --         write_instruction(sub     , sum_addr(0)      , input_voltage_addr , lc1_voltage_addr) ,
+        --         write_instruction(mpy_add , mult_add_addr(0) , input_voltage_addr , lc1_voltage_addr) ,
+
+    begin
+
+        return retval;
+        
+    end pfc_model_program;
+
+    constant ram_contents : ram_array := (others => (others => '0'));
 
 begin
 
@@ -50,7 +107,7 @@ begin
     simtime : process
     begin
         test_runner_setup(runner, runner_cfg);
-        wait until realtime >= 100.0e-3;
+        wait until realtime >= 40.0e-3;
         test_runner_cleanup(runner); -- Simulation ends here
         wait;
     end process simtime;	
@@ -102,8 +159,8 @@ begin
             mult(6)     := sum(0)*l_gain;
             mult(8)     := mult_add(0)*pri_l_gain;
             mult(9)     := mult_add(1)*dc_link_gain;
-            mult(4)     := (sum(1))*c_gain;
-            mult(5)     := (sum(3))*c_gain;
+            mult(4)     := sum(1)*c_gain;
+            mult(5)     := sum(3)*c_gain;
             mult(3)     := r_load * self.i3;
             mult(7)     := sum(2) * l_gain;
             sum(4)      := mult(0) + mult(1);
@@ -139,19 +196,17 @@ begin
                     k_pfc(3) := calculate_pfc(pfc + k_pfc(2)/2.0 , l , c , dc_link_gain , pri_l_gain , r , 0.0 , uin , pfc.dc_link/load_r , duty);
                     k_pfc(4) := calculate_pfc(pfc + k_pfc(3)     , l , c , dc_link_gain , pri_l_gain , r , 0.0 , uin , pfc.dc_link/load_r , duty);
 
-                    pfc <= pfc + (k_pfc(1) + k_pfc(2)/0.5 + k_pfc(3)/0.5 + k_pfc(4))/6.0;
-                    -- pfc <= pfc + k_pfc(2);
+                    -- pfc <= pfc + (k_pfc(1) + k_pfc(2)/0.5 + k_pfc(3)/0.5 + k_pfc(4))/6.0;
+                    pfc <= pfc + k_pfc(2);
 
                     realtime <= realtime + timestep;
-                    write_to(file_handler,(realtime, pfc.dc_link, pfc.lc2.current, pfc.dc_link/load_r, -duty*pfc.i3));
+                    write_to(file_handler,(realtime, pfc.dc_link, pfc.lc2.current, pfc.dc_link/load_r, duty*pfc.i3));
 
                 when others => --do nothing
             end case;
 
-            -- if realtime > 15.0e-3 then duty   <= 0.4; end if;
-            if realtime > 50.0e-3 then duty   <= 0.8; end if;
-            -- if realtime > 80.0e-3 then load_r <= 10.0; end if;
-            -- if realtime > 60.0e-3 then uin    <= 0.6; end if;
+            if realtime > 15.0e-3 then duty   <= 0.25; end if;
+            if realtime > 30.0e-3 then load_r <= 500.0; end if;
 
             sequencer <= sequencer + 1;
             if sequencer > 0 then
@@ -160,5 +215,19 @@ begin
 
         end if; -- rising_edge
     end process stimulus;	
+------------------------------------------------------------------------
+    u_mpram : entity work.ram_read_x4_write_x1
+    generic map(ram_contents)
+    port map(
+    simulator_clock          ,
+    ram_read_instruction_in  ,
+    ram_read_instruction_out ,
+    ram_read_data_in         ,
+    ram_read_data_out        ,
+    ram_read_2_data_in       ,
+    ram_read_2_data_out      ,
+    ram_read_3_data_in       ,
+    ram_read_3_data_out      ,
+    ram_write_port);
 ------------------------------------------------------------------------
 end vunit_simulation;
