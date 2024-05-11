@@ -39,7 +39,7 @@ architecture vunit_simulation of supply_model_tb is
     signal l            : real := timestep/5.5e-6;
     signal c            : real := timestep/0.68e-6;
     signal dc_link_gain : real := timestep/1.0e-3;
-    signal pri_l_gain   : real := timestep/1.0e-3;
+    signal pri_l_gain   : real := timestep/3.0e-3;
     signal uin          : real := 100.0;
 
     signal load : real := 0.0;
@@ -50,7 +50,7 @@ begin
     simtime : process
     begin
         test_runner_setup(runner, runner_cfg);
-        wait until realtime >= 65.0e-3;
+        wait until realtime >= 100.0e-3;
         test_runner_cleanup(runner); -- Simulation ends here
         wait;
     end process simtime;	
@@ -62,27 +62,6 @@ begin
 
     ------------------------------
         type lc_array is array (integer range 1 to 4) of lc_record;
-        function calculate_lc
-        (
-            lc : lc_record;
-            l_gain : real;
-            c_gain : real;
-            r_l : real;
-            r_load : real;
-            input_voltage : real;
-            load_current : real
-        )
-        return lc_record
-        is
-            variable retval : lc_record;
-        begin
-
-            retval.current := ((input_voltage - lc.voltage) - r_l*lc.current + r_load * load_current) * l_gain;
-            retval.voltage := (lc.current - load_current)*c_gain;
-
-            return retval;
-            
-        end calculate_lc;
     ------------------------------
     ------------------------------
         type pfc_array is array (natural range <>) of pfc_record;
@@ -114,8 +93,8 @@ begin
             end case;
 
             -- if realtime > 15.0e-3 then duty   <= 0.4; end if;
-            if realtime > 30.0e-3 then duty   <= 0.8; end if;
-            -- if realtime > 40.0e-3 then load_r <= 50.0; end if;
+            if realtime > 50.0e-3 then duty   <= 0.8; end if;
+            -- if realtime > 80.0e-3 then load_r <= 10.0; end if;
             -- if realtime > 60.0e-3 then uin    <= 0.6; end if;
 
             sequencer <= sequencer + 1;

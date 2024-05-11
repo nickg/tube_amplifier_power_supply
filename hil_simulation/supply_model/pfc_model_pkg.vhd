@@ -36,6 +36,16 @@ package pfc_model_pkg is
     )
     return pfc_record;
 
+    function calculate_lc (
+        lc : lc_record;
+        l_gain : real;
+        c_gain : real;
+        r_l : real;
+        r_load : real;
+        input_voltage : real;
+        load_current : real)
+    return lc_record;
+
 end package pfc_model_pkg;
 
 package body pfc_model_pkg is
@@ -112,6 +122,28 @@ package body pfc_model_pkg is
 
             return retval;
         end calculate_pfc;
+
+    function calculate_lc
+    (
+        lc : lc_record;
+        l_gain : real;
+        c_gain : real;
+        r_l : real;
+        r_load : real;
+        input_voltage : real;
+        load_current : real
+    )
+    return lc_record
+    is
+        variable retval : lc_record;
+    begin
+
+        retval.current := ((input_voltage - lc.voltage) - r_l*lc.current + r_load * load_current) * l_gain;
+        retval.voltage := (lc.current - load_current)*c_gain;
+
+        return retval;
+        
+    end calculate_lc;
 
 end package body pfc_model_pkg;
 ------------------------------------------------------------------------
