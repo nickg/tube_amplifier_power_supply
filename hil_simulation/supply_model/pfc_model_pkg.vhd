@@ -89,39 +89,38 @@ package body pfc_model_pkg is
         
     end "/";
 
-        function calculate_pfc
-        (
-            self          : pfc_record;
-            l_gain        : real ;
-            c_gain        : real ;
-            dc_link_gain  : real ;
-            pri_l_gain    : real ;
-            r_l           : real ;
-            r_load        : real ;
-            input_voltage : real ;
-            load_current  : real ;
-            duty          : real range -1.0 to 1.0
-        )
-        return pfc_record
-        is
-            variable retval : pfc_record := self;
-        begin
+    function calculate_pfc
+    (
+        self          : pfc_record;
+        l_gain        : real ;
+        c_gain        : real ;
+        dc_link_gain  : real ;
+        pri_l_gain    : real ;
+        r_l           : real ;
+        r_load        : real ;
+        input_voltage : real ;
+        load_current  : real ;
+        duty          : real range -1.0 to 1.0
+    )
+    return pfc_record
+    is
+        variable retval : pfc_record := self;
+    begin
 
-            -- retval.lc1     := calculate_lc(self.lc1 , l , c , r , 0.0 , uin             , self.lc2.current);
 
-            retval.lc1.current := ((input_voltage - self.lc1.voltage) - r_l*self.lc1.current + r_load * 0.0) * l_gain;
-            retval.lc1.voltage := (self.lc1.current - self.lc2.current)*c_gain;
+        -- retval.lc1.current := ((input_voltage - self.lc1.voltage) - r_l*self.lc1.current + r_load * 0.0) * l_gain;
+        -- retval.lc1.voltage := (self.lc1.current - self.lc2.current)*c_gain;
+        -- retval.lc2.current := ((self.lc1.voltage - self.lc2.voltage) - r_l*self.lc2.current + r_load * 0.0) * l_gain;
+        -- retval.lc2.voltage := (self.lc2.current - self.i3)*c_gain;
 
-            -- retval.lc2     := calculate_lc(self.lc2 , l , c , r , 0.0 , self.lc1.voltage , pfc.i3);
+        retval.lc1     := calculate_lc(self.lc1 , l_gain , c_gain , r_l , 0.0 , input_voltage             , self.lc2.current);
+        retval.lc2     := calculate_lc(self.lc2 , l_gain , c_gain , r_l , 0.0 , self.lc1.voltage , self.i3);
 
-            retval.lc2.current := ((self.lc1.voltage - self.lc2.voltage) - r_l*self.lc2.current + r_load * 0.0) * l_gain;
-            retval.lc2.voltage := (self.lc2.current - self.i3)*c_gain;
+        retval.i3      := (self.lc2.voltage - self.dc_link*duty)*pri_l_gain;
+        retval.dc_link := (duty*self.i3 - load_current)*dc_link_gain;
 
-            retval.i3      := (self.lc2.voltage - self.dc_link*duty)*pri_l_gain;
-            retval.dc_link := (duty*self.i3 - load_current)*dc_link_gain;
-
-            return retval;
-        end calculate_pfc;
+        return retval;
+    end calculate_pfc;
 
     function calculate_lc
     (
