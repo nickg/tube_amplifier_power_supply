@@ -85,4 +85,4 @@ vunit_out/
 build/
 build_cyclone/
 build_ecp5/
-
+*.swm

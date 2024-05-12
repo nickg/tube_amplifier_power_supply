@@ -69,7 +69,7 @@ architecture vunit_simulation of rtl_model_tube_power_tb is
 
     function pfc_model_program
     (
-        pfc_address        : natural;
+        pfc_address        : natural ;
         l_gain_addr        : natural ;
         c_gain_addr        : natural ;
         dc_link_gain_addr  : natural ;
@@ -78,7 +78,7 @@ architecture vunit_simulation of rtl_model_tube_power_tb is
         r_load_addr        : natural ;
         input_voltage_addr : natural ;
         load_current_addr  : natural ;
-        duty_addr          : real range -1.0 to 1.0
+        duty_addr          : natural
     )
     return ram_array
     is
@@ -86,20 +86,70 @@ architecture vunit_simulation of rtl_model_tube_power_tb is
         variable sum_addr      : integer_vector (0 to 5) := (0,1,2,3,4,5);
         variable mult_add_addr : integer_vector (0 to 3) := (7,8,9,10);
         variable mult_addr     : integer_vector (0 to 9) := (11,12,13,14,15,16,17,18,19,20);
+        variable self_lc1_current_addr : natural := pfc_address + 0;
+        variable self_lc2_current_addr : natural := pfc_address + 1;
+        variable self_lc1_voltage_addr : natural := pfc_address + 2;
+        variable self_lc2_voltage_addr : natural := pfc_address + 3;
+        variable self_dc_link_addr     : natural := pfc_address + 4;
+        variable self_i3_addr          : natural := pfc_address + 5;
 
-        -- constant program : program_array :=(
-        -- pipelined_block(
-        --     program_array'(
-        --         write_instruction(sub     , sum_addr(0)      , input_voltage_addr , lc1_voltage_addr) ,
-        --         write_instruction(mpy_add , mult_add_addr(0) , input_voltage_addr , lc1_voltage_addr) ,
+        constant program : program_array :=(
+        pipelined_block(
+            program_array'(
+                write_instruction(sub     , sum_addr(0)      , input_voltage_addr    , self_lc1_voltage_addr)   ,
+                write_instruction(mpy_add , mult_add_addr(0) , self_dc_link_addr     , duty_addr                , self_lc2_voltage_addr) ,
+                write_instruction(mpy_add , mult_add_addr(1) , self_i3_addr          , duty_addr                , load_current_addr)     ,
+                write_instruction(sub     , sum_addr(1)      , self_lc1_current_addr , self_lc2_current_addr)   ,
+                write_instruction(sub     , sum_addr(3)      , self_lc2_current_addr , self_i3_addr)            ,
+                write_instruction(sub     , sum_addr(2)      , self_lc1_voltage_addr , self_lc2_voltage_addr)   ,
+                write_instruction(mpy     , mult_addr(0)     , r_l_addr              , self_lc1_current_addr)   ,
+                write_instruction(mpy     , mult_addr(1)     , r_load_addr           , self_lc2_current_addr)   ,
+                write_instruction(mpy     , mult_addr(2)     , r_l_addr              , self_lc2_current_addr) )
+        )&
+        pipelined_block(
+            program_array'(
+                write_instruction(mpy , mult_addr(6) , sum_addr(0)      , l_gain_addr)       ,
+                write_instruction(mpy , mult_addr(8) , mult_add_addr(0) , pri_l_gain_addr)   ,
+                write_instruction(mpy , mult_addr(9) , mult_add_addr(1) , dc_link_gain_addr) ,
+                write_instruction(mpy , mult_addr(4) , sum_addr(1)      , c_gain_addr)       ,
+                write_instruction(mpy , mult_addr(5) , sum_addr(3)      , c_gain_addr)       ,
+                write_instruction(mpy , mult_addr(3) , r_load_addr      , self_i3_addr)      ,
+                write_instruction(mpy , mult_addr(7) , sum_addr(2)      , l_gain_addr)       ,
+                write_instruction(add , sum_addr(4)  , mult_addr(0)     , mult_addr(1))      ,
+                write_instruction(add , sum_addr(5)  , mult_addr(2)     , mult_addr(3)))
+        )&
+        pipelined_block(
+            program_array'(
+                write_instruction(mpy_add, mult_add_addr(2), sum_addr(4), l_gain_addr, mult_addr(6)),
+                write_instruction(mpy_add, mult_add_addr(3), sum_addr(5), l_gain_addr, mult_addr(7)))
+        )&
+        write_instruction(program_end)
+    );
 
     begin
+        for i in program'range loop
+            retval(i+128) := program(i);
+        end loop;
 
         return retval;
         
     end pfc_model_program;
 
-    constant ram_contents : ram_array := (others => (others => '0'));
+    constant ram_contents : ram_array := pfc_model_program(
+        pfc_address        => 50,
+        l_gain_addr        => 51,
+        c_gain_addr        => 52,
+        dc_link_gain_addr  => 53,
+        pri_l_gain_addr    => 54,
+        r_l_addr           => 55,
+        r_load_addr        => 56,
+        input_voltage_addr => 57,
+        load_current_addr  => 58,
+        duty_addr          => 59);
+
+
+
+
 
 begin
 
@@ -146,7 +196,7 @@ begin
 
             -- block1 
             sum(0)      := input_voltage - self.lc1.voltage;
-            mult_add(0) := self.lc2.voltage - self.dc_link*duty;
+            mult_add(0) := -self.dc_link*duty + self.lc2.voltage ;
             mult_add(1) := duty*self.i3 - load_current;
             sum(1)      := self.lc1.current - self.lc2.current;
             sum(3)      := self.lc2.current - self.i3;
@@ -167,8 +217,8 @@ begin
             sum(5)      := mult(2) + mult(3);
 
             -- block3 
-            mult_add(2) := mult(6) + (sum(4)) * l_gain;
-            mult_add(3) := mult(7) + (sum(5)) * l_gain;
+            mult_add(2) := sum(4) * l_gain + mult(6);
+            mult_add(3) := sum(5) * l_gain + mult(7);
 
             retval.lc1.current := mult_add(2);
             retval.lc1.voltage := mult(4);
