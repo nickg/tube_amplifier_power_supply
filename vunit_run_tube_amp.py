@@ -58,5 +58,6 @@ mcu.add_source_files(ROOT / "hil_simulation/supply_model/pfc_model_pkg.vhd")
 
 mcu.add_source_files(ROOT / "hil_simulation/supply_model/supply_model_tb.vhd")
 mcu.add_source_files(ROOT / "hil_simulation/supply_model/rtl_model_tube_power_tb.vhd")
+mcu.add_source_files(ROOT / "hil_simulation/supply_model/boost_rtl_tb.vhd")
 
 VU.main()
