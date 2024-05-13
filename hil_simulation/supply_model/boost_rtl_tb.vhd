@@ -43,8 +43,8 @@ architecture vunit_simulation of boost_rtl_tb is
     signal voltage : real := 0.0;
     signal input_voltage : real := 1.0;
     constant r : real := 0.56;
-    constant l : real := timestep/100.0e-6;
-    constant c : real := timestep/100.0e-6;
+    constant l : real := timestep/50.0e-6;
+    constant c : real := timestep/50.0e-6;
     signal sequencer : natural := 0;
 
     constant input_voltage_addr : natural := 0;
@@ -53,9 +53,11 @@ architecture vunit_simulation of boost_rtl_tb is
     constant c_addr             : natural := 3;
     constant l_addr             : natural := 4;
     constant r_addr             : natural := 5;
-    constant mac1_addr          : natural := 6;
+    constant i1_x_ra_plus_uc    : natural := 6;
     constant mac2_addr          : natural := voltage_addr;
     constant sub1_addr          : natural := 7;
+
+    constant uin_minus_uc1          : natural := 8;
 
     function build_lcr_sw (filter_gain : real range 0.0 to 1.0; u_address, y_address, g_address, temp_address : natural) return ram_array
     is
@@ -63,12 +65,13 @@ architecture vunit_simulation of boost_rtl_tb is
         constant program : program_array :=(
             pipelined_block(
                 program_array'(
-                write_instruction(mpy_add , mac1_addr    , current_addr , r_addr , voltage_addr) ,
-                write_instruction(mpy_add , voltage_addr , current_addr , c_addr , voltage_addr)
+                write_instruction(sub     , uin_minus_uc1   , current_addr , r_addr , voltage_addr) ,
+                write_instruction(mpy_add , i1_x_ra_plus_uc , current_addr , r_addr , voltage_addr) ,
+                write_instruction(mpy_add , voltage_addr    , current_addr , c_addr , voltage_addr)
                 )
             ) &
             pipelined_block(
-                write_instruction(sub , sub1_addr , input_voltage_addr , mac1_addr)
+                write_instruction(sub , sub1_addr , input_voltage_addr , i1_x_ra_plus_uc)
             ) &
             pipelined_block(
                 write_instruction(mpy_add , current_addr , sub1_addr , l_addr , current_addr)
@@ -86,7 +89,7 @@ architecture vunit_simulation of boost_rtl_tb is
         retval(c_addr            ) := to_std_logic_vector(to_float(c));
         retval(l_addr            ) := to_std_logic_vector(to_float(l));
         retval(r_addr            ) := to_std_logic_vector(to_float(r));
-        retval(mac1_addr         ) := to_std_logic_vector(to_float(0.0));
+        retval(i1_x_ra_plus_uc   ) := to_std_logic_vector(to_float(0.0));
         retval(mac2_addr         ) := to_std_logic_vector(to_float(0.0));
         retval(sub1_addr         ) := to_std_logic_vector(to_float(0.0));
 
@@ -156,12 +159,15 @@ begin
 
             CASE sequencer is
                 WHEN 0 => 
-                    mac1 := current * r + voltage;
-                    mac2 := current * c + voltage;
-
-                    sub1 := input_voltage - mac1;
-
-                    mac3 := sub1 * l + current;
+                    dil1 := ((uin - uc1)      - (rl1+rc1)*il1 + rc2*i2)*L1;
+                    dil2 := ((uc1 - uc2)      + rc1*il1 - (rc2 + rl2 + rc3)*i2 + rc3*i3)*L2;
+                    dil3 := ((uc2 - duty*udc) + rc2*il2 - (rc3 + rl3 + rbridge)*i3)*L3;
+                    il1  := il1 + di11;
+                    il2  := il2 + di12;
+                    il3  := il3 + di13;
+                    uc1  := uc1 + (il1 - il2) * c1;
+                    uc2  := uc2 + (il2 - il3) * c2;
+                    udc  := udc + (il3*duty - iload) * cdc;
 
                     current   <= mac3;
                     voltage   <= mac2;
