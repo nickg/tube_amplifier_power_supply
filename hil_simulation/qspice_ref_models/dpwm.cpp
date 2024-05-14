@@ -7,10 +7,10 @@
 #include <cmath>
 
 const double
-    gate_hi_voltage = 15.0   ,
+    gate_hi_voltage = 6.0   ,
     gate_lo_voltage = -3.3   ,
-    deadtime        = 200e-9 ,
-    Ts              = 1.0/50.0e3; //
+    deadtime        = 80e-9 ,
+    Ts              = 1.0/30.0e3; //
 
 double
     deadtime_start = 0 ,
@@ -55,8 +55,11 @@ extern "C" __declspec(dllexport) void dpwm(void **opaque, double t, union uData 
 
     if ((CLK>0.999)&&(CLK<=1.001))  // rising_edge of clock
     {
-        duty = 0.25;
-        sampled_current = 1000.0*(l1_current - l2_current);
+        duty = 0.5;
+        if (t > 15e-3)
+         duty = 0.25;
+
+        sampled_current = -1000.0*(l1_current - l2_current);
     }
 
     // modulator
@@ -86,9 +89,9 @@ extern "C" __declspec(dllexport) void dpwm(void **opaque, double t, union uData 
         }
     // modulator - end
 
-    if (t > 3.0e-3)
+    if (t > 6.0e-3)
     {
-        iload = -1.0;
+        iload = -0.0;
     } else {
         iload = 0;
     }

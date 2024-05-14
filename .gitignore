@@ -90,3 +90,5 @@ build_ecp5/
 *.dll
 *.qopraw
 *.raw
+*.cir
+*.utf8
