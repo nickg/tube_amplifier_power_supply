@@ -86,3 +86,7 @@ build/
 build_cyclone/
 build_ecp5/
 *.swm
+*.qraw
+*.dll
+*.qopraw
+*.raw
