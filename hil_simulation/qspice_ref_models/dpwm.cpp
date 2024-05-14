@@ -45,17 +45,18 @@ int __stdcall DllMain(void *module, unsigned int reason, void *reserved) { retur
 extern "C" __declspec(dllexport) void dpwm(void **opaque, double t, union uData *data)
 {
    double  CLK             = data[0].d; // input
-   double &PWM             = data[1].d; // output
-   double &PWM_lo          = data[2].d; // output
-   double &carrier         = data[3].d; // output
-   double &iload           = data[4].d; // output
-   double l1_current       = data[5].d; // input
-   double &sampled_current = data[6].d; // output
+   double l1_current       = data[1].d; // input
+   double l2_current       = data[2].d; // input
+   double &PWM             = data[3].d; // output
+   double &PWM_lo          = data[4].d; // output
+   double &carrier         = data[5].d; // output
+   double &iload           = data[6].d; // output
+   double &sampled_current = data[7].d; // output
 
     if ((CLK>0.999)&&(CLK<=1.001))  // rising_edge of clock
     {
         duty = 0.25;
-        sampled_current = l1_current;
+        sampled_current = 1000.0*(l1_current - l2_current);
     }
 
     // modulator
