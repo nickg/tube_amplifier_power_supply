@@ -92,3 +92,5 @@ build_ecp5/
 *.raw
 *.cir
 *.utf8
+*.obj
+*.def

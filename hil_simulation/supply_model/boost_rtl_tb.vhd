@@ -39,8 +39,10 @@ architecture vunit_simulation of boost_rtl_tb is
     signal realtime : real := 0.0;
     signal timestep : real := 1.7e-6;
 
+    signal uin : real := 0.0;
     signal uc1 : real := 0.0;
     constant rl1 : real := 0.1;
+    constant rc1 : real := 0.015;
 
     signal current : real := 0.0;
     signal voltage : real := 0.0;
@@ -151,6 +153,11 @@ begin
         file file_handler : text open write_mode is "boost_rtl_tb.dat";
         variable dil1, dil2, dil3 : real; 
         constant uin : real := 1.0;
+        variable il1 : real := 0.0;
+        variable il2 : real := 0.0;
+        variable il3 : real := 0.0;
+        constant rc2 : real := 0.15;
+        constant L1 : real := timestep/10.0e-6;
     begin
         if rising_edge(simulator_clock) then
             simulation_counter <= simulation_counter + 1;
@@ -160,7 +167,7 @@ begin
 
             CASE sequencer is
                 WHEN 0 => 
-                    /* dil1 := ((uin - uc1)      - (rl1+rc1)*il1 + rc2*i2)*L1; */
+                    dil1 := ((uin - uc1)      - (rl1+rc1)*il1 + rc2*il2)*L1;
                     /* dil2 := ((uc1 - uc2)      + rc1*il1 - (rc2 + rl2 + rc3)*i2 + rc3*i3)*L2; */
                     /* dil3 := ((uc2 - duty*udc) + rc2*il2 - (rc3 + rl3 + rbridge)*i3)*L3; */
                     /* il1  := il1 + di11; */

@@ -4,6 +4,8 @@
 //
 //    dmc -mn -WD dpwmcl.cpp kernel32.lib
 
+// compiled with gcc in widows
+// gcc -c -o dpwm.o dpwm.cpp & gcc -o dpwm.dll -s -shared dpwm.o -Wl,--subsystem,windows
 #include <cmath>
 
 const double
@@ -52,12 +54,10 @@ extern "C" __declspec(dllexport) void dpwm(void **opaque, double t, union uData 
    double &carrier         = data[5].d; // output
    double &iload           = data[6].d; // output
    double &sampled_current = data[7].d; // output
+   double &vin             = data[8].d; // output
 
     if ((CLK>0.999)&&(CLK<=1.001))  // rising_edge of clock
     {
-        duty = 0.5;
-        if (t > 15e-3)
-         duty = 0.25;
 
         sampled_current = -1000.0*(l1_current - l2_current);
     }
@@ -89,10 +89,23 @@ extern "C" __declspec(dllexport) void dpwm(void **opaque, double t, union uData 
         }
     // modulator - end
 
+    // model excitement
     if (t > 6.0e-3)
     {
         iload = -0.0;
     } else {
         iload = 0;
     }
+
+    if (t > 40.0e-3)
+        vin = 120.0;
+    else
+        vin = 100.0;
+
+    if (t > 15e-3)
+        duty = 0.25;
+    else
+        duty = 0.5;
+    // model excitement end
+
 }

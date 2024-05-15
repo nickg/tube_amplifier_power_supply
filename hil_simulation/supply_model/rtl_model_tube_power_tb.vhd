@@ -134,7 +134,7 @@ begin
     simtime : process
     begin
         test_runner_setup(runner, runner_cfg);
-        wait until realtime >= 40.0e-3;
+        wait until realtime >= 60.0e-3;
         test_runner_cleanup(runner); -- Simulation ends here
         wait;
     end process simtime;	
@@ -234,6 +234,7 @@ begin
 
             if realtime > 15.0e-3 then duty   <= 0.25; end if;
             if realtime > 30.0e-3 then load_r <= 500.0; end if;
+            if realtime > 40.0e-3 then uin    <= 120.0; end if;
 
             sequencer <= sequencer + 1;
             if sequencer > 0 then
