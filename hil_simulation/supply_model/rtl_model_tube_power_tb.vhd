@@ -33,7 +33,7 @@ architecture vunit_simulation of rtl_model_tube_power_tb is
     -----------------------------------
     -- simulation specific signals ----
     signal realtime : real := 0.0;
-    constant timestep : real := 64.0/128.0e6;
+    constant timestep : real := 128.0/128.0e6;
 
     signal sequencer : natural := 1;
 
@@ -148,7 +148,7 @@ begin
         type pfc_array is array (natural range <>) of pfc_record;
         variable k_pfc : pfc_array(1 to 4);
 
-        file file_handler : text open write_mode is "supply_model_tb.dat";
+        file file_handler : text open write_mode is "rtl_model_tube_power_tb.dat";
 
         function calculate_pfc
         (
