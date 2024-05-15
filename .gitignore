@@ -94,3 +94,4 @@ build_ecp5/
 *.utf8
 *.obj
 *.def
+hil_simulation/build/
