@@ -7,11 +7,12 @@
 // compiled with gcc in widows
 // gcc -c -o dpwm.o dpwm.cpp & gcc -o dpwm.dll -s -shared dpwm.o -Wl,--subsystem,windows
 #include <cmath>
+#include "constants.hpp"
 
 const double
-    gate_hi_voltage = 6.0   ,
+    gate_hi_voltage = 6.0    ,
     gate_lo_voltage = -3.3   ,
-    deadtime        = 80e-9 ,
+    deadtime        = deadtimelength ,
     Ts              = 1.0/30.0e3; //
 
 double
