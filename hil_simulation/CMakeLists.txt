@@ -1,19 +1,19 @@
 cmake_minimum_required(VERSION 3.15)
 project(MyProject)
 
-# Include directories
-include_directories(${PROJECT_SOURCE_DIR}/cpp_sources)
-
-# Collect source files
-set(SOURCES
-    ${PROJECT_SOURCE_DIR}/cpp_sources/modulator.hpp
-    ${PROJECT_SOURCE_DIR}/cpp_sources/modulator.cpp
-    ${PROJECT_SOURCE_DIR}/qspice_ref_models/dpwm.cpp
-)
-
 # Create a shared library (DLL) named 'dpwm'
-add_library(dpwm SHARED ${SOURCES})
-
+add_library(dpwm
+    SHARED
+        cpp_sources/modulator.hpp
+        cpp_sources/modulator.cpp
+        qspice_ref_models/dpwm.cpp
+)
+ 
+# Include directories
+target_include_directories(dpwm
+    PUBLIC
+	cpp_sources
+)
 # Define MYLIB_EXPORTS to manage symbol export and import
 target_compile_definitions(dpwm PRIVATE MYLIB_EXPORTS)
 
