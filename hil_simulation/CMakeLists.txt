@@ -48,4 +48,3 @@ set(boost_closed_loop_sources
 create_shared_library(dpwm "${dpwm_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models)
 create_shared_library(boost_open_loop "${boost_open_loop_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models/boost_simulation)
 create_shared_library(boost_closed_loop "${boost_closed_loop_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models/boost_simulation)
-

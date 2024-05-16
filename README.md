@@ -34,11 +34,11 @@ how to run build
 
 oneliner to build and plot results run from tube_amplifier_power_supply/
 
-cd .\hil_simulation\build\ ; cmake --build . ; copy Debug\dpwm.dll ../qspice_ref_models/dpwm.dll ; cd .. ; cd .. ; python hil_simulation/qspice_ref_models/plot_boost_ref.py
+cd .\hil_simulation\build\ ; cmake --build . ; cd .. ; cd .. ; python hil_simulation/qspice_ref_models/plot_boost_ref.py
 
 if using cmd, replace semicolons(;) with &
 
-cd hil_simulation\build\ & cmake --build . & copy Debug\dpwm.dll ..\qspice_ref_models\dpwm.dll & cd .. & cd .. & python hil_simulation\qspice_ref_models\plot_boost_ref.py
+cd hil_simulation\build\ & cmake --build . & cd .. & cd .. & python hil_simulation\qspice_ref_models\plot_boost_ref.py
 
 ## Overall system level 
 
