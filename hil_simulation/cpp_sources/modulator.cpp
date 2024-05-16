@@ -32,10 +32,16 @@ void Modulator::update(double t) {
     }
 }
 
-double Modulator::calculate_carrier(double t)
+double Modulator::calculate_carrier(double t) const
 {
     return std::fabs((t / Ts - std::floor(t / Ts)) * 2.0 - 1.0);
 }
+
+void Modulator::set_duty(double set_duty_to)
+{
+    duty = set_duty_to;
+}
+
 
 double Modulator::getPWM() const {
     return PWM;
@@ -43,11 +49,6 @@ double Modulator::getPWM() const {
 
 double Modulator::getPWMLo() const {
     return PWM_lo;
-}
-
-void Modulator::set_duty(double set_duty_to)
-{
-    duty = set_duty_to;
 }
 
 double Modulator::get_carrier() const

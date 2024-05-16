@@ -9,7 +9,7 @@ public:
 
     void update(double t);
     void set_duty(double set_duty_to);
-    double calculate_carrier(double t);
+    double calculate_carrier(double t) const;
     bool synchronous_sample_called(double t) const;
 
     double getPWM() const;
