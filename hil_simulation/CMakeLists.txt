@@ -1,69 +1,43 @@
 cmake_minimum_required(VERSION 3.15)
 project(MyProject)
 
-# Create a shared library (DLL) named 'dpwm'
-add_library(dpwm
-    SHARED
-        cpp_sources/modulator.hpp
-        cpp_sources/modulator.cpp
-        qspice_ref_models/dpwm.cpp
+# Function to create a shared library
+function(create_shared_library lib_name source_files)
+    add_library(${lib_name} SHARED ${source_files})
+    
+    target_include_directories(${lib_name}
+        PUBLIC
+            cpp_sources
+    )
+
+    target_compile_definitions(${lib_name} PRIVATE MYLIB_EXPORTS)
+    
+    target_link_libraries(${lib_name} PRIVATE kernel32)
+endfunction()
+
+# Common source files
+set(common_sources
+    cpp_sources/modulator.hpp
+    cpp_sources/modulator.cpp
 )
- 
-# Include directories
-target_include_directories(dpwm
-    PUBLIC
-	cpp_sources
+
+# Specific source files for each library
+set(dpwm_sources
+    ${common_sources}
+    qspice_ref_models/dpwm.cpp
 )
-# Define MYLIB_EXPORTS to manage symbol export and import
-target_compile_definitions(dpwm PRIVATE MYLIB_EXPORTS)
 
-# Link the shared library with kernel32.dll
-target_link_libraries(dpwm PRIVATE kernel32)
-
-# ----------------------------------------------------------
-
-cmake_minimum_required(VERSION 3.15)
-project(MyProject)
-
-# Create a shared library (DLL) named 'dpwm'
-add_library(boost_open_loop
-    SHARED
-        cpp_sources/modulator.hpp
-        cpp_sources/modulator.cpp
-        qspice_ref_models/boost_simulation/boost_open_loop.cpp
+set(boost_open_loop_sources
+    ${common_sources}
+    qspice_ref_models/boost_simulation/boost_open_loop.cpp
 )
- 
-# Include directories
-target_include_directories(boost_open_loop
-    PUBLIC
-	cpp_sources
+
+set(boost_closed_loop_sources
+    ${common_sources}
+    qspice_ref_models/boost_simulation/boost_closed_loop.cpp
 )
-# Define MYLIB_EXPORTS to manage symbol export and import
-target_compile_definitions(boost_open_loop PRIVATE MYLIB_EXPORTS)
 
-# Link the shared library with kernel32.dll
-target_link_libraries(boost_open_loop PRIVATE kernel32)
-
-# ----------------------------------------------------------
-
-cmake_minimum_required(VERSION 3.15)
-project(MyProject)
-
-# Create a shared library (DLL) named 'dpwm'
-add_library(boost_closed_loop
-    SHARED
-        cpp_sources/modulator.hpp
-        cpp_sources/modulator.cpp
-        qspice_ref_models/boost_simulation/boost_closed_loop.cpp
-)
- 
-# Include directories
-target_include_directories(boost_closed_loop
-    PUBLIC
-	cpp_sources
-)
-# Define MYLIB_EXPORTS to manage symbol export and import
-target_compile_definitions(boost_closed_loop PRIVATE MYLIB_EXPORTS)
-
-# Link the shared library with kernel32.dll
-target_link_libraries(boost_closed_loop PRIVATE kernel32)
+# Create shared libraries
+create_shared_library(dpwm "${dpwm_sources}")
+create_shared_library(boost_open_loop "${boost_open_loop_sources}")
+create_shared_library(boost_closed_loop "${boost_closed_loop_sources}")
