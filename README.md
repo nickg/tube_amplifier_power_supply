@@ -20,6 +20,18 @@ cmake -G "Visual Studio 17 2022" -DCMAKE_GENERATOR_PLATFORM=Win32 ..
 the project can be built then using
 cmake --build .
 
+
+1. mkdir hil_simulation/build
+2. cd hil_simulation/build
+3. cmake -G "Visual Studio 17 2022" -DCMAKE_GENERATOR_PLATFORM=Win32 ..
+4. go back to tube_amplifier_power_supply
+
+
+oneliner to build and plot results run from tube_amplifier_power_supply/
+cd .\hil_simulation\build\ ; cmake --build . ; copy Debug\dpwm.dll ../qspice_ref_models/dpwm.dll ; cd .. ; cd .. ; python hil_simulation/qspice_ref_models/plot_boost_ref.py
+if using cmd, replace semicolons(;) with &
+cd hil_simulation\build\ & cmake --build . & copy Debug\dpwm.dll ..\qspice_ref_models\dpwm.dll & cd .. & cd .. & python hil_simulation\qspice_ref_models\plot_boost_ref.py
+
 ## Overall system level 
 
 test if code snippet works.
