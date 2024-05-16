@@ -59,7 +59,7 @@ extern "C" __declspec(dllexport) void boost_open_loop(void **opaque, double t, u
     // model excitement
     if (t > 30.0e-3)
     {
-        iload = -0.0;
+        iload = -1.0;
     } else {
         iload = 0;
     }
