@@ -3,25 +3,27 @@
 
 #include <cmath>
 
-#define deadtimelength 50e-9
-
 class Modulator {
 public:
     Modulator(double Ts, double duty, double gate_hi_voltage, double gate_lo_voltage, double deadtime);
 
     void update(double t);
-    double getPWM() const;
-    double getPWMLo() const;
     void set_duty(double set_duty_to);
     double calculate_carrier(double t);
+    bool synchronous_sample_called(double t) const;
 
-/* private: */
+    double getPWM() const;
+    double getPWMLo() const;
+    double get_carrier() const;
+
+private:
     double Ts;
     double duty;
     double gate_hi_voltage;
     double gate_lo_voltage;
     double deadtime;
     double carrier;
+    double interrupt_time;
 
     double previous_pwm;
     double PWM;

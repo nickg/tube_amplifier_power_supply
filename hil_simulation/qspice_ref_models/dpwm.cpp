@@ -10,17 +10,15 @@
 #include "modulator.hpp"
 
 const double
-    deadtime = 50e-9,
-    gate_hi_voltage = 6.0     ,
-    gate_lo_voltage = -3.3    ,
-    Ts              = 1.0/30.0e3;
+    gate_hi_voltage = 6.0   ,
+    gate_lo_voltage = -3.3  ,
+    deadtime        = 50e-9 ,
+    Ts              = 1.0/30.0e3 ;
 
 double
     duty            = 0.5 ,
-    iload           = 0 ,
-    t_interrupt     = 0 ,
-    sampled_current = 0
-    ;
+    iload           = 0   ,
+    sampled_current = 0 ;
 
 Modulator modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 
@@ -47,29 +45,24 @@ int __stdcall DllMain(void *module, unsigned int reason, void *reserved) { retur
 
 extern "C" __declspec(dllexport) void dpwm(void **opaque, double t, union uData *data)
 {
-   double  CLK             = data[0].d; // input
-   double l1_current       = data[1].d; // input
-   double l2_current       = data[2].d; // input
-   double &PWM             = data[3].d; // output
-   double &PWM_lo          = data[4].d; // output
-   double &carrier         = data[5].d; // output
-   double &iload           = data[6].d; // output
-   double &sampled_current = data[7].d; // output
-   double &vin             = data[8].d; // output
+   double l1_current       = data[0].d; // input
+   double l2_current       = data[1].d; // input
+   double &PWM             = data[2].d; // output
+   double &PWM_lo          = data[3].d; // output
+   double &carrier         = data[4].d; // output
+   double &iload           = data[5].d; // output
+   double &sampled_current = data[6].d; // output
+   double &vin             = data[7].d; // output
 
-    if (t > t_interrupt)  // rising_edge of clock
+    if (modulator.synchronous_sample_called(t))  // rising_edge of clock
     {
-        t_interrupt = t + Ts;
-
         sampled_current = -1000.0*(l1_current - l2_current);
     }
 
-    // modulator
-        modulator.update(t);
-        carrier = modulator.calculate_carrier(t);
-    // modulator - end
-    PWM = modulator.getPWM();
-    PWM_lo = modulator.getPWMLo();
+    modulator.update(t);
+    carrier = modulator.calculate_carrier(t);
+    PWM     = modulator.getPWM();
+    PWM_lo  = modulator.getPWMLo();
 
     // model excitement
     if (t > 30.0e-3)
