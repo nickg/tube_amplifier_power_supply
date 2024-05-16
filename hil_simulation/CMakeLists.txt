@@ -23,24 +23,24 @@ function(create_shared_library lib_name source_files destination_folder)
 endfunction()
 
 # Common source files
-set(common_sources
+set(modulator_sources
     cpp_sources/modulator.hpp
     cpp_sources/modulator.cpp
 )
 
 # Specific source files for each library
 set(dpwm_sources
-    ${common_sources}
+    ${modulator_sources}
     qspice_ref_models/dpwm.cpp
 )
 
 set(boost_open_loop_sources
-    ${common_sources}
+    ${modulator_sources}
     qspice_ref_models/boost_simulation/boost_open_loop.cpp
 )
 
 set(boost_closed_loop_sources
-    ${common_sources}
+    ${modulator_sources}
     qspice_ref_models/boost_simulation/boost_closed_loop.cpp
 )
 
