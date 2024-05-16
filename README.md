@@ -15,6 +15,11 @@ Since the system is relatively complicated, a HIL simulation will be created to 
 
 The HiL simulation will be done using the microprocessor libraries in order to run the simulation in floating point.
 
+Building the hil simulation C++ sources for QSPICE requires CMake and the .dll needs to be generated with 32bit platform. Example using Visual Studio 
+cmake -G "Visual Studio 17 2022" -DCMAKE_GENERATOR_PLATFORM=Win32 ..
+the project can be built then using
+cmake --build .
+
 ## Overall system level 
 
 test if code snippet works.
