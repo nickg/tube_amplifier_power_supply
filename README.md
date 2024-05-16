@@ -15,11 +15,16 @@ Since the system is relatively complicated, a HIL simulation will be created to 
 
 The HiL simulation will be done using the microprocessor libraries in order to run the simulation in floating point.
 
-Building the hil simulation C++ sources for QSPICE requires CMake and the .dll needs to be generated with 32bit platform. Example using Visual Studio 
+Building the hil simulation C++ sources for QSPICE requires CMake and the .dll needs to be generated with 32bit platform. 
+Example using Visual Studio 
+
 cmake -G "Visual Studio 17 2022" -DCMAKE_GENERATOR_PLATFORM=Win32 ..
+
 the project can be built then using
+
 cmake --build .
 
+how to run build
 
 1. mkdir hil_simulation/build
 2. cd hil_simulation/build
@@ -28,8 +33,11 @@ cmake --build .
 
 
 oneliner to build and plot results run from tube_amplifier_power_supply/
+
 cd .\hil_simulation\build\ ; cmake --build . ; copy Debug\dpwm.dll ../qspice_ref_models/dpwm.dll ; cd .. ; cd .. ; python hil_simulation/qspice_ref_models/plot_boost_ref.py
+
 if using cmd, replace semicolons(;) with &
+
 cd hil_simulation\build\ & cmake --build . & copy Debug\dpwm.dll ..\qspice_ref_models\dpwm.dll & cd .. & cd .. & python hil_simulation\qspice_ref_models\plot_boost_ref.py
 
 ## Overall system level 
