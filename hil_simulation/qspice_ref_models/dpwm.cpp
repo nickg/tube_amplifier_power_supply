@@ -7,22 +7,22 @@
 // compiled with gcc in widows
 // gcc -c -o dpwm.o dpwm.cpp & gcc -o dpwm.dll -s -shared dpwm.o -Wl,--subsystem,windows
 #include <cmath>
-#include "constants.hpp"
+#include "modulator.hpp"
 
 const double
-    gate_hi_voltage = 6.0    ,
-    gate_lo_voltage = -3.3   ,
-    deadtime        = deadtimelength ,
-    Ts              = 1.0/30.0e3; //
+    deadtime = 50e-9,
+    gate_hi_voltage = 6.0     ,
+    gate_lo_voltage = -3.3    ,
+    Ts              = 1.0/30.0e3;
 
 double
-    deadtime_start = 0 ,
-    deadtime_stop  = 0 ,
-    previous_pwm   = 0 ,
-    duty           = 0 ,
-    iload          = 0 ,
+    duty            = 0.5 ,
+    iload           = 0 ,
+    t_interrupt     = 0 ,
     sampled_current = 0
     ;
+
+Modulator modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 
 union uData
 {
@@ -57,41 +57,22 @@ extern "C" __declspec(dllexport) void dpwm(void **opaque, double t, union uData 
    double &sampled_current = data[7].d; // output
    double &vin             = data[8].d; // output
 
-    if ((CLK>0.999)&&(CLK<=1.001))  // rising_edge of clock
+    if (t > t_interrupt)  // rising_edge of clock
     {
+        t_interrupt = t + Ts;
 
         sampled_current = -1000.0*(l1_current - l2_current);
     }
 
     // modulator
-        carrier = fabs((t/Ts - floor(t/Ts))*2.0 - 1.0);
-
-        if (duty>carrier)
-        {
-            PWM    = gate_hi_voltage;
-            PWM_lo = gate_lo_voltage;
-        }
-        else
-        {
-            PWM    = gate_lo_voltage;
-            PWM_lo = gate_hi_voltage;
-        }
-
-        if (previous_pwm != PWM)
-        {
-            deadtime_start = t;
-            deadtime_stop  = t + deadtime;
-        }
-        previous_pwm = PWM;
-
-        if (t >= deadtime_start && t <= deadtime_stop) {
-            PWM    = gate_lo_voltage;
-            PWM_lo = gate_lo_voltage;
-        }
+        modulator.update(t);
+        carrier = modulator.calculate_carrier(t);
     // modulator - end
+    PWM = modulator.getPWM();
+    PWM_lo = modulator.getPWMLo();
 
     // model excitement
-    if (t > 6.0e-3)
+    if (t > 30.0e-3)
     {
         iload = -0.0;
     } else {
@@ -104,9 +85,7 @@ extern "C" __declspec(dllexport) void dpwm(void **opaque, double t, union uData 
         vin = 100.0;
 
     if (t > 15e-3)
-        duty = 0.25;
+        modulator.set_duty(0.25);
     else
-        duty = 0.5;
-    // model excitement end
-
+        modulator.set_duty(0.5);
 }

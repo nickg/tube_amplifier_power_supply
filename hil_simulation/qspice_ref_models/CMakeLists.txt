@@ -1,5 +1,8 @@
 # Create a shared library (DLL) named 'mylib'
-add_library(dpwm SHARED dpwm.cpp constants.hpp)
+add_library(dpwm SHARED 
+    dpwm.cpp 
+    modulator.hpp
+    modulator.cpp)
 
 # Define MYLIB_EXPORTS to manage symbol export and import
 target_compile_definitions(dpwm PRIVATE MYLIB_EXPORTS)
