@@ -13,9 +13,9 @@ The hVHDL project has required DSP and math libraries so we will refactor the co
 ## HIL simulation
 Since the system is relatively complicated, a HIL simulation will be created to test overall functionality. This includes trips and control loops. The modeling will be quite simple since the main idea is to test at system level, ie whatever is visible from uart.
 
-The HiL simulation will be done using the microprocessor libraries in order to run the simulation in floating point.
+The HiL simulation will be done using the hVHDL microcode processor libraries in order to run the simulation in floating point.
 
-Building the hil simulation C++ sources for QSPICE requires CMake and the .dll needs to be generated with 32bit platform. 
+Building the hil simulation C++ sources for QSPICE model verification requires CMake and the .dll needs to be generated with 32bit platform. 
 Example using Visual Studio 
 
 cmake -G "Visual Studio 17 2022" -DCMAKE_GENERATOR_PLATFORM=Win32 ..
