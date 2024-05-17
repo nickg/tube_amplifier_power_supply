@@ -18,7 +18,6 @@ double
     sampled_current = 0 ;
 
 double
-    i_error = 0.0,
     i_term = 0.0;
 
 #include "../../cpp_sources/modulator.hpp"
@@ -73,13 +72,36 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
 
     if (modulator.synchronous_sample_called(t))  // rising_edge of clock
     {
-        double iref = 4.0;
+        /* double iref = 4.0; */
 
-        if (t > 10e-3)   iref = 5.0;
-        if (t > 20e-3)   iref = -5.0;
-        if (t > 29.2e-3) iref = 5.5;
-        if (t > 50.0e-3) iref = -5.5;
-        if (t > 55.0e-3) iref = 3.0;
+        /* if (t > 10e-3)   iref = 5.0; */
+        /* if (t > 20e-3)   iref = -5.0; */
+        /* if (t > 29.2e-3) iref = 5.5; */
+        /* if (t > 50.0e-3) iref = -5.5; */
+        /* if (t > 55.0e-3) iref = 3.0; */
+
+        const double vref = 200.0;
+        double v_error = vref - uout;
+
+
+        const double vkp = 1.8;
+        const double vki = 0.05;
+        const double vk_term = v_error * vkp;
+        double iref = vk_term + i_term;
+        i_term = i_term + v_error * vki;
+
+        /* const double upper_limit = vin-min_duty*uout; */
+        /* const double lower_limit = vin-max_duty*uout; */
+        /* if (uL < lower_limit) { */
+        /*     i_term = i_term - sgn(uL - lower_limit)*0.1; */
+        /*     uL = lower_limit; */
+        /* }else if(uL > upper_limit){ */
+        /*     i_term = i_term + sgn(uL - upper_limit)*0.1; */
+        /*     uL = upper_limit; */
+        /* }else{ */
+        /* } */
+        /* if (fabs(uL) > 31.0) */
+        /*     uL = sgn(uL)*31.0; */
 
         const double shunt_res = 0.001;
         sampled_current = (l2_current - l1_current)/shunt_res;
@@ -99,13 +121,13 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
     // model excitement
     if (t > 30.0e-3)
     {
-        iload = -2.0;
+        iload = 0.0;
     } else {
-        iload = -2.0;
+        iload = 0.0;
     }
 
     if (t > 00.0e-3) vin = 100.0;
     /* if (t > 40.0e-3) vin = 130.0; */
-    if (t > 35.0e-3) vin = 10.0;
+    /* if (t > 35.0e-3) vin = 10.0; */
 
 }
