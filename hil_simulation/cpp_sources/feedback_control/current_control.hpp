@@ -21,7 +21,7 @@ private:
     double max_duty;
     double pi_limit;
 
-    double LimitPIOout(double pi_out, double i_error, double lower_limit, double upper_limit);
+    double calculate_pi_out(double pi_out, double i_error, double lower_limit, double upper_limit);
     double sgn(double input);
 };
 

@@ -12,7 +12,7 @@ double CurrentController::compute(double iref, double sampled_current, double vi
     const double upper_limit = vin - min_duty * uout;
     const double lower_limit = vin - max_duty * uout;
 
-    pi_out = LimitPIOout(pi_out, i_error, lower_limit, upper_limit);
+    pi_out = calculate_pi_out(pi_out, i_error, lower_limit, upper_limit);
 
     if (std::fabs(pi_out) > pi_limit) {
         pi_out = sgn(pi_out) * pi_limit;
@@ -33,7 +33,7 @@ void CurrentController::setPiLimit(double pi_limit) {
     this->pi_limit = pi_limit;
 }
 
-double CurrentController::LimitPIOout(double pi_out, double i_error, double lower_limit, double upper_limit) {
+double CurrentController::calculate_pi_out(double pi_out, double i_error, double lower_limit, double upper_limit) {
     if (pi_out < lower_limit) {
         i_term -= sgn(pi_out - lower_limit) * 0.1;
         pi_out = lower_limit;

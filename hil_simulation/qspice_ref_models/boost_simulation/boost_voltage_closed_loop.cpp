@@ -25,12 +25,12 @@ double
 Modulator modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 #include "../../cpp_sources/feedback_control/current_control.hpp"
 
-const 
+const
     double ikp = 16.0;
     double iki = 8.0;
     double min_duty = 0.1;
     double max_duty = 0.9;
-CurrentController current_control(ikp, iki, min_duty, max_duty); 
+CurrentController current_control(ikp, iki, min_duty, max_duty);
 
 union uData
 {
@@ -57,9 +57,9 @@ double sgn(double input){
     double retval = 1.0;
     if (input < 0.0) retval = -1.0;
     return retval;
-} 
+}
 
-extern "C" __declspec(dllexport) void boost_closed_loop(void **opaque, double t, union uData *data)
+extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, double t, union uData *data)
 {
    double l1_current       = data[0].d; // input
    double l2_current       = data[1].d; // input
