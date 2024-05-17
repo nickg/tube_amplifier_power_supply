@@ -59,10 +59,18 @@ extern "C" __declspec(dllexport) void boost_closed_loop(void **opaque, double t,
 
     if (modulator.synchronous_sample_called(t))  // rising_edge of clock
     {
-        sampled_current = -1000.0*(l1_current - l2_current);
-        i_error = 4.0 - sampled_current;
-        double duty = vin/uout + i_error * 0.06 + i_term;
-        i_term = i_term + i_error * 0.03;
+        double iref = 4.0;
+        if (t > 10e-3) iref = 5.0;
+        if (t > 20e-3) iref = -5.0;
+        if (t > 22e-3) iref = 0.1;
+        if (t > 26e-3) iref = 2.1;
+
+        const double shunt_res = 0.001;
+        sampled_current = (l2_current - l1_current)/shunt_res;
+        i_error = iref - sampled_current;
+        double uL = -i_error * 16.0 + i_term;
+        double duty = (vin - uL)/uout;
+        i_term = i_term - i_error * 8.0;
         if (duty > 0.9){
             duty = 0.9;
             /* i_term = 0.9 - i_error*0.1; */
@@ -71,9 +79,9 @@ extern "C" __declspec(dllexport) void boost_closed_loop(void **opaque, double t,
             duty = 0.1;
             /* i_term = 0.1-i_error*0.1; */
         }
-        modulator.set_duty(1-duty);
+        modulator.set_duty(1.0-duty);
 
-        carrier = i_error;
+        carrier = duty;
     }
 
     modulator.update(t);
@@ -83,13 +91,13 @@ extern "C" __declspec(dllexport) void boost_closed_loop(void **opaque, double t,
     // model excitement
     if (t > 30.0e-3)
     {
-        iload = 2.0;
+        iload = -2.0;
     } else {
         iload = -2.0;
     }
 
     if (t > 40.0e-3)
-        vin = 150.0;
+        vin = 100.0;
     else
         vin = 100.0;
 
