@@ -41,6 +41,8 @@ set(boost_open_loop_sources
 
 set(boost_closed_loop_sources
     ${modulator_sources}
+    cpp_sources/feedback_control/current_control.hpp
+    cpp_sources/feedback_control/current_control.cpp
     qspice_ref_models/boost_simulation/boost_closed_loop.cpp
 )
 

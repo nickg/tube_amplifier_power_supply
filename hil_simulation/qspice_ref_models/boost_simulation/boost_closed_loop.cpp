@@ -5,7 +5,6 @@
 //    dmc -mn -WD boost_closed_loop.cpp kernel32.lib
 
 #include <cmath>
-#include "../../cpp_sources/modulator.hpp"
 
 const double
     gate_hi_voltage = 6.0   ,
@@ -22,7 +21,16 @@ double
     i_error = 0.0,
     i_term = 0.0;
 
+#include "../../cpp_sources/modulator.hpp"
 Modulator modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
+#include "../../cpp_sources/feedback_control/current_control.hpp"
+
+const 
+    double ikp = 16.0;
+    double iki = 8.0;
+    double min_duty = 0.1;
+    double max_duty = 0.9;
+CurrentController current_control(ikp, iki, min_duty, max_duty); 
 
 union uData
 {
@@ -65,8 +73,6 @@ extern "C" __declspec(dllexport) void boost_closed_loop(void **opaque, double t,
 
     if (modulator.synchronous_sample_called(t))  // rising_edge of clock
     {
-        const double ikp = 16.0;
-        const double iki = 8.0;
         double iref = 4.0;
 
         if (t > 10e-3)   iref = 5.0;
@@ -78,27 +84,7 @@ extern "C" __declspec(dllexport) void boost_closed_loop(void **opaque, double t,
         const double shunt_res = 0.001;
         sampled_current = (l2_current - l1_current)/shunt_res;
 
-        i_error = iref - sampled_current;
-
-        const double k_term = i_error * ikp;
-        double uL = k_term + i_term;
-
-        const double min_duty = 0.1;
-        const double max_duty = 0.9;
-        const double upper_limit = vin-min_duty*uout;
-        const double lower_limit = vin-max_duty*uout;
-        if (uL < lower_limit) {
-            i_term = i_term - sgn(uL - lower_limit)*0.1;
-            uL = lower_limit;
-        }else if(uL > upper_limit){
-            i_term = i_term + sgn(uL - upper_limit)*0.1;
-            uL = upper_limit;
-        }else{
-            i_term = i_term + i_error * iki;
-        }
-        if (fabs(uL) > 31.0)
-            uL = sgn(uL)*31.0;
-
+        double uL = current_control.compute(iref, sampled_current, vin, uout);
 
         double duty = (vin - uL)/uout;
         modulator.set_duty(duty);
