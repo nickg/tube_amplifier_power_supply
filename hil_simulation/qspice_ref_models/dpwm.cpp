@@ -60,7 +60,7 @@ extern "C" __declspec(dllexport) void dpwm(void **opaque, double t, union uData 
     }
 
     modulator.update(t);
-    carrier = modulator.calculate_carrier(t);
+    carrier = calculate_carrier(t, Ts);
     PWM     = modulator.getPWM();
     PWM_lo  = modulator.getPWMLo();
 

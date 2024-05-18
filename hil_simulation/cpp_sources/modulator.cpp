@@ -1,4 +1,9 @@
 #include "modulator.hpp"
+double calculate_carrier(double t, double Ts)
+{
+    const double offset = Ts/0.5;
+    return std::fabs(((t + offset) / Ts - std::floor((t+ offset) / Ts )) * 2.0 - 1.0);
+}
 
 Modulator::Modulator(double Ts, double duty, double gate_hi_voltage, double gate_lo_voltage, double deadtime)
     : deadtimecontrol(gate_hi_voltage, gate_lo_voltage, deadtime), Ts(Ts), duty(duty), previous_duty(0.0), gate_hi_voltage(gate_hi_voltage), gate_lo_voltage(gate_lo_voltage), deadtime(deadtime), carrier(0.0), previous_carrier(0.0), interrupt_time(0.0),
@@ -11,7 +16,7 @@ void Modulator::update(double t) {
         interrupt_time = t + Ts;
     }
     previous_carrier = carrier;
-    carrier = calculate_carrier(t);
+    carrier = calculate_carrier(t, Ts);
     previous_edge = rising_edge_when_1;
     if (previous_carrier > carrier) {
         rising_edge_when_1 = 1.0;
@@ -38,11 +43,6 @@ void Modulator::update(double t) {
     }
 }
 
-double Modulator::calculate_carrier(double t) const
-{
-    const double offset = Ts/0.5;
-    return std::fabs(((t + offset) / Ts - std::floor((t+ offset) / Ts )) * 2.0 - 1.0);
-}
 
 void Modulator::set_duty(double set_duty_to)
 {
