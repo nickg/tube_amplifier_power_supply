@@ -86,12 +86,12 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
     {
 
         double vref = 200.0;
-        if (t > 50.0e-3) vref = 150.0;
+        if (t > 45.0e-3) vref = 150.0;
         double v_error = vref - uout;
 
 
         const double vkp = 0.3* 0.9;
-        const double vki = 0.3 * 0.05;
+        const double vki = 0.3 * 0.025;
         const double vk_term = v_error * vkp;
         double iref = vk_term + i_term;
         i_term = i_term + v_error * vki;
@@ -138,7 +138,7 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
     PWM_lo  = modulator.getPWMLo();
 
     // model excitement
-    if (t > 40.0e-3)
+    if (t > 20.0e-3)
     {
         iload = 2.0;
     } else {
