@@ -86,14 +86,13 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
    double &vin             = data[8].d; // output
    double &sample_trigger  = data[9].d; // output
 
-    if (modulator.synchronous_sample_called(t))  // rising_edge_when_1 of clock
+    if (modulator.synchronous_sample_called(t))
     {
 
         double vref = 200.0;
         if (t > 30.0e-3) vref = 120.0;
-        if (t > 50.0e-3) vref = 200.0;
+        if (t > 50.0e-3) vref = 180.0;
         double v_error = vref - uout;
-
 
         double iref = voltage_control.compute(v_error);
 
@@ -119,21 +118,16 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
     else
         sample_trigger = 0.0;
 
-
-
     modulator.update(t);
     PWM     = modulator.getPWM();
     PWM_lo  = modulator.getPWMLo();
 
     // model excitement
-    if (t > 20.0e-3)
-    {
-        iload = -2.0;
-    } else {
-        iload = 0.0;
-    }
-
     if (t > 00.0e-3) vin = 100.0;
+    if (t > 20.0e-3) iload = -2.0;
     if (t > 40.0e-3) vin = 130.0;
+    if (t > 65.0e-3) iload = 10.0;
+    if (t > 70.0e-3) iload = -10.0;
+    if (t > 80.0e-3) iload = 0.0;
 
 }
