@@ -27,14 +27,18 @@ int previous_edge = 0;
 
 #include "../../cpp_sources/modulator.hpp"
 Modulator modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
-#include "../../cpp_sources/feedback_control/current_control.hpp"
 
 const
     double ikp = 16.0;
     double iki = 8.0;
     double min_duty = 0.1;
     double max_duty = 0.9;
+
+#include "../../cpp_sources/feedback_control/current_control.hpp"
 CurrentController current_control(ikp, iki, min_duty, max_duty);
+
+#include "../../cpp_sources/feedback_control/voltage_control.hpp"
+VoltageController voltage_control;
 
 union uData
 {
@@ -91,24 +95,7 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
         double v_error = vref - uout;
 
 
-        const double vkp = 0.3* 0.9;
-        const double vki = 0.3 * 0.025;
-        const double vk_term = v_error * vkp;
-        double iref = vk_term + i_term;
-
-        const double upper_limit = 7.0;
-        const double lower_limit = -7.0;
-        if (iref < lower_limit) {
-            i_term = i_term - sgn(iref - lower_limit)*0.1;
-            iref = lower_limit;
-        }else if(iref > upper_limit){
-            i_term = i_term - sgn(iref - upper_limit)*0.1;
-            iref = upper_limit;
-        }else{
-            i_term = i_term + v_error * vki;
-        }
-        if (fabs(iref) > 10.0)
-            iref = sgn(iref)*31.0;
+        double iref = voltage_control.compute(v_error);
 
         const double shunt_res = 0.001;
         sampled_current = (l2_current - l1_current)/shunt_res;
@@ -141,13 +128,12 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
     // model excitement
     if (t > 20.0e-3)
     {
-        iload = 2.0;
+        iload = -2.0;
     } else {
         iload = 0.0;
     }
 
     if (t > 00.0e-3) vin = 100.0;
     if (t > 40.0e-3) vin = 130.0;
-    /* if (t > 35.0e-3) vin = 10.0; */
 
 }

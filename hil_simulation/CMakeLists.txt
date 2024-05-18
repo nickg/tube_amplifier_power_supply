@@ -50,6 +50,8 @@ set(boost_voltage_closed_loop_sources
     ${modulator_sources}
     cpp_sources/feedback_control/current_control.hpp
     cpp_sources/feedback_control/current_control.cpp
+    cpp_sources/feedback_control/voltage_control.hpp
+    cpp_sources/feedback_control/voltage_control.cpp
     qspice_ref_models/boost_simulation/boost_voltage_closed_loop.cpp
 )
 
