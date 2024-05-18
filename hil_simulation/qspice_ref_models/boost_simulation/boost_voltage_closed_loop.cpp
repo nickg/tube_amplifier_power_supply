@@ -86,7 +86,8 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
     {
 
         double vref = 200.0;
-        if (t > 45.0e-3) vref = 150.0;
+        if (t > 30.0e-3) vref = 120.0;
+        if (t > 50.0e-3) vref = 200.0;
         double v_error = vref - uout;
 
 
@@ -94,20 +95,20 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
         const double vki = 0.3 * 0.025;
         const double vk_term = v_error * vkp;
         double iref = vk_term + i_term;
-        i_term = i_term + v_error * vki;
 
-        /* const double upper_limit = vin-min_duty*uout; */
-        /* const double lower_limit = vin-max_duty*uout; */
-        /* if (uL < lower_limit) { */
-        /*     i_term = i_term - sgn(uL - lower_limit)*0.1; */
-        /*     uL = lower_limit; */
-        /* }else if(uL > upper_limit){ */
-        /*     i_term = i_term + sgn(uL - upper_limit)*0.1; */
-        /*     uL = upper_limit; */
-        /* }else{ */
-        /* } */
-        /* if (fabs(uL) > 31.0) */
-        /*     uL = sgn(uL)*31.0; */
+        const double upper_limit = 7.0;
+        const double lower_limit = -7.0;
+        if (iref < lower_limit) {
+            i_term = i_term - sgn(iref - lower_limit)*0.1;
+            iref = lower_limit;
+        }else if(iref > upper_limit){
+            i_term = i_term - sgn(iref - upper_limit)*0.1;
+            iref = upper_limit;
+        }else{
+            i_term = i_term + v_error * vki;
+        }
+        if (fabs(iref) > 10.0)
+            iref = sgn(iref)*31.0;
 
         const double shunt_res = 0.001;
         sampled_current = (l2_current - l1_current)/shunt_res;
