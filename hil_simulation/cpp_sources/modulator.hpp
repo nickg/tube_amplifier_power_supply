@@ -1,10 +1,8 @@
 #ifndef MODULATOR_H
 #define MODULATOR_H
+double calculate_carrier(double t, double Ts);
 
 #include <cmath>
-
-#ifndef DEADTIMECONTROLLER_H
-#define DEADTIMECONTROLLER_H
 
 class DeadtimeController {
 public:
@@ -27,9 +25,6 @@ private:
     void applyDeadtime(double t);
 };
 
-#endif // DEADTIMECONTROLLER_H
-
-double calculate_carrier(double t, double Ts);
 
 class Modulator {
 public:
