@@ -4,6 +4,16 @@
 //
 //    dmc -mn -WD dual_half_bridge.cpp kernel32.lib
 
+const double
+    gate_hi_voltage = 6.0   ,
+    gate_lo_voltage = -3.3  ,
+    deadtime        = 50e-9 ,
+    Ts              = 1.0/30.0e3 ,
+    duty            = 0.5;
+
+#include "../../cpp_sources/modulator.hpp"
+Modulator modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
+
 union uData
 {
    bool b;
@@ -49,5 +59,7 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
    double &vout     = data[8].d; // output
 
 // Implement module evaluation code here:
+
+   modulator.update(t);
 
 }
