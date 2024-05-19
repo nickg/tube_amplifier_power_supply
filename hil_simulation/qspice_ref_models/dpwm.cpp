@@ -1,11 +1,5 @@
 // Automatically generated C++ file on Mon Feb  5 19:35:36 2024
 //
-// To build with Digital Mars C++ Compiler:
-//
-//    dmc -mn -WD dpwmcl.cpp kernel32.lib
-
-// compiled with gcc in widows
-// gcc -c -o dpwm.o dpwm.cpp & gcc -o dpwm.dll -s -shared dpwm.o -Wl,--subsystem,windows
 #include <cmath>
 #include "../cpp_sources/modulator/modulator.hpp"
 #include "../cpp_sources/carrier_generation/carrier_generation.hpp"

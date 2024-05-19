@@ -3,13 +3,13 @@
 
 Modulator::Modulator(double Ts, double duty, double gate_hi_voltage, double gate_lo_voltage, double deadtime)
     : deadtimecontrol(gate_hi_voltage, gate_lo_voltage, deadtime), Ts(Ts),
-    duty(duty), previous_duty(0.0), carrier(0.0), previous_carrier(0.0), rising_edge_when_1(0), previous_edge(0) { }
+    duty(duty), previous_duty(0.0), carrier(0.0), previous_carrier(0.0), phase(0.0), rising_edge_when_1(0), previous_edge(0) { }
 
 
 void Modulator::update(double t) {
 
     previous_carrier = carrier;
-    carrier          = calculate_carrier(t, Ts);
+    carrier          = calculate_carrier(t, Ts, phase);
     previous_edge    = rising_edge_when_1;
     if (previous_carrier > carrier) {
         rising_edge_when_1 = 1.0;
@@ -29,6 +29,10 @@ void Modulator::set_duty(double set_duty_to)
 {
     previous_duty = duty;
     duty = set_duty_to;
+}
+void Modulator::set_phase(double set_phase_to)
+{
+    phase = set_phase_to;
 }
 
 

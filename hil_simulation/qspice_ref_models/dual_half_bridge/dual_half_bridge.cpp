@@ -3,15 +3,16 @@
 // To build with Digital Mars C++ Compiler:
 //
 //    dmc -mn -WD dual_half_bridge.cpp kernel32.lib
+#include <cmath>
+#include "../../cpp_sources/modulator/modulator.hpp"
+#include "../../cpp_sources/carrier_generation/carrier_generation.hpp"
 
 const double
     gate_hi_voltage = 6.0   ,
     gate_lo_voltage = -3.3  ,
     deadtime        = 50e-9 ,
-    Ts              = 1.0/30.0e3 ,
+    Ts              = 1.0/100.0e3 ,
     duty            = 0.5;
-
-#include "../../cpp_sources/modulator/modulator.hpp"
 
 union uData
 {
@@ -31,7 +32,8 @@ union uData
 };
 
 
-/* Modulator modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime); */
+Modulator modulator1(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
+Modulator modulator2(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 
 int __stdcall DllMain(void *module, unsigned int reason, void *reserved) { return 1; }
 
@@ -61,4 +63,16 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
 
    /* modulator.update(t); */
    vin = 400.0;
+   vout = vin;
+   modulator1.update(t);
+   modulator2.update(t);
+   carrier1 = modulator1.get_carrier();
+   carrier2 = modulator2.get_carrier();
+   gate1 = modulator1.getPWM();
+   gate2 = modulator1.getPWMLo();
+   gate3 = modulator2.getPWM();
+   gate4 = modulator2.getPWMLo();
+   if (t > 140e-6) modulator2.set_phase(-0.1);
+   /* if (t > 200e-6) modulator2.set_phase(0.1); */
+
 }

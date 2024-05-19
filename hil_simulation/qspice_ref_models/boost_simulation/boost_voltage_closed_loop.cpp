@@ -57,12 +57,6 @@ union uData
    unsigned char *bytes;
 };
 
-double calculate_carrier(double t, double Ts, double phase_plusminus_half)
-{
-    const double phase = Ts*phase_plusminus_half;
-    return std::fabs(((t + phase) / Ts - std::floor((t+ phase) / Ts )) * 2.0 - 1.0);
-}
-
 // int DllMain() must exist and return 1 for a process to load the .DLL
 // See https://docs.microsoft.com/en-us/windows/win32/dlls/dllmain for more information.
 int __stdcall DllMain(void *module, unsigned int reason, void *reserved) { return 1; }
@@ -105,18 +99,6 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
         modulator.set_duty(duty);
 
     }
-    double prev_carrier = carrier;
-    carrier = calculate_carrier(t, Ts, 0.5);
-    previous_edge = rising_edge_when_1;
-    if (prev_carrier > carrier) {
-        rising_edge_when_1 = 1.0;
-    }else
-        rising_edge_when_1 = 0.0;
-
-    if (previous_edge != rising_edge_when_1)
-        sample_trigger = 1.0;
-    else
-        sample_trigger = 0.0;
 
     modulator.update(t);
     PWM     = modulator.getPWM();
