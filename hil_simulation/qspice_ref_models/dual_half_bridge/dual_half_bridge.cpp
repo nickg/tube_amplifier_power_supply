@@ -35,6 +35,8 @@ union uData
 Modulator modulator1(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 Modulator modulator2(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 
+double iterm = 0;
+
 int __stdcall DllMain(void *module, unsigned int reason, void *reserved) { return 1; }
 
 // #undef pin names lest they collide with names in any header file(s) you might include.
@@ -59,11 +61,20 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
    double &gate3    = data[6].d; // output
    double &gate4    = data[7].d; // output
    double &vout     = data[8].d; // output
+   double &iload    = data[9].d; // output
 // Implement module evaluation code here:
 
+    if (modulator2.synchronous_sample_called(t))  // rising_edge of clock
+    {
+        double verror = 400-vdc;
+        double piout = 0.1 * verror + iterm;
+        iterm = iterm + verror * 0.004;
+        modulator1.set_phase(piout);
+        vout = piout;
+
+    }
    /* modulator.update(t); */
    vin = 400.0;
-   vout = vin;
    modulator1.update(t);
    modulator2.update(t);
    carrier1 = modulator1.get_carrier();
@@ -72,7 +83,7 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
    gate2 = modulator1.getPWMLo();
    gate3 = modulator2.getPWM();
    gate4 = modulator2.getPWMLo();
-   if (t > 140e-6) modulator2.set_phase(-0.1);
-   /* if (t > 200e-6) modulator2.set_phase(0.1); */
+   iload = 0.0;
+   if (t > 5e-3) iload = -1.0;
 
 }
