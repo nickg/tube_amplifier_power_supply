@@ -67,8 +67,8 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
     if (modulator2.synchronous_sample_called(t))  // rising_edge of clock
     {
         double verror = 400-vdc;
-        double piout = 0.1 * verror + iterm;
-        iterm = iterm + verror * 0.004;
+        double piout = 0.15* verror + iterm;
+        iterm = iterm + verror * 0.01;
         modulator1.set_phase(piout);
         vout = piout;
 
