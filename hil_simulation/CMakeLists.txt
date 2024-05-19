@@ -24,6 +24,8 @@ endfunction()
 
 # Common source files
 set(modulator_sources
+    cpp_sources/carrier_generation/carrier_generation.hpp
+    cpp_sources/carrier_generation/carrier_generation.cpp
     cpp_sources/deadtime/deadtimecontroller.hpp
     cpp_sources/deadtime/deadtimecontroller.cpp
     cpp_sources/modulator/modulator.hpp

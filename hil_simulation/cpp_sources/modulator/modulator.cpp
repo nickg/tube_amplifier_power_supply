@@ -1,9 +1,5 @@
 #include "modulator.hpp"
-double calculate_carrier(double t, double Ts)
-{
-    const double offset = Ts/0.5;
-    return std::fabs(((t + offset) / Ts - std::floor((t+ offset) / Ts )) * 2.0 - 1.0);
-}
+#include "../carrier_generation/carrier_generation.hpp"
 
 Modulator::Modulator(double Ts, double duty, double gate_hi_voltage, double gate_lo_voltage, double deadtime)
     : deadtimecontrol(gate_hi_voltage, gate_lo_voltage, deadtime), Ts(Ts),
