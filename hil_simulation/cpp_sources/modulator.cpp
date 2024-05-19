@@ -6,8 +6,8 @@ double calculate_carrier(double t, double Ts)
 }
 
 Modulator::Modulator(double Ts, double duty, double gate_hi_voltage, double gate_lo_voltage, double deadtime)
-    : deadtimecontrol(gate_hi_voltage, gate_lo_voltage, deadtime), Ts(Ts), duty(duty), previous_duty(0.0), gate_hi_voltage(gate_hi_voltage), gate_lo_voltage(gate_lo_voltage), deadtime(deadtime), carrier(0.0), previous_carrier(0.0), interrupt_time(0.0),
-      previous_pwm(0.0), PWM(gate_lo_voltage), PWM_lo(gate_hi_voltage), deadtime_start(0.0), deadtime_stop(0.0), rising_edge_when_1(0), previous_edge(0) { }
+    : deadtimecontrol(gate_hi_voltage, gate_lo_voltage, deadtime), Ts(Ts), duty(duty), previous_duty(0.0), carrier(0.0), previous_carrier(0.0), interrupt_time(0.0),
+      rising_edge_when_1(0), previous_edge(0) { }
 
 
 void Modulator::update(double t) {
@@ -24,23 +24,11 @@ void Modulator::update(double t) {
         rising_edge_when_1 = 0.0;
 
     if (duty > carrier) {
-        PWM = gate_hi_voltage;
-        PWM_lo = gate_lo_voltage;
+        PWM = 1.0;
     } else {
-        PWM = gate_lo_voltage;
-        PWM_lo = gate_hi_voltage;
+        PWM = 0.0;
     }
-
-    if (previous_pwm != PWM) {
-        deadtime_start = t;
-        deadtime_stop = t + deadtime;
-    }
-    previous_pwm = PWM;
-
-    if (t >= deadtime_start && t <= deadtime_stop) {
-        PWM = gate_lo_voltage;
-        PWM_lo = gate_lo_voltage;
-    }
+    deadtimecontrol.update(t, PWM);
 }
 
 
@@ -52,11 +40,11 @@ void Modulator::set_duty(double set_duty_to)
 
 
 double Modulator::getPWM() const {
-    return PWM;
+    return deadtimecontrol.getPWM_hi();
 }
 
 double Modulator::getPWMLo() const {
-    return PWM_lo;
+    return deadtimecontrol.getPWM_lo();
 }
 
 double Modulator::get_carrier() const

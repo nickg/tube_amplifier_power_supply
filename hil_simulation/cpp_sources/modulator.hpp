@@ -45,18 +45,11 @@ private:
     double Ts;
     double duty;
     double previous_duty;
-    double gate_hi_voltage;
-    double gate_lo_voltage;
-    double deadtime;
     double carrier;
     double previous_carrier;
     double interrupt_time;
 
-    double previous_pwm;
     double PWM;
-    double PWM_lo;
-    double deadtime_start;
-    double deadtime_stop;
 
     int rising_edge_when_1;
     int previous_edge;
