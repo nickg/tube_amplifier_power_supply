@@ -25,7 +25,7 @@ double
 int rising_edge_when_1 = 0;
 int previous_edge = 0;
 
-#include "../../cpp_sources/modulator.hpp"
+#include "../../cpp_sources/modulator/modulator.hpp"
 Modulator modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 
 const

@@ -7,7 +7,7 @@
 // compiled with gcc in widows
 // gcc -c -o dpwm.o dpwm.cpp & gcc -o dpwm.dll -s -shared dpwm.o -Wl,--subsystem,windows
 #include <cmath>
-#include "modulator.hpp"
+#include "../cpp_sources/modulator/modulator.hpp"
 
 const double
     gate_hi_voltage = 6.0   ,

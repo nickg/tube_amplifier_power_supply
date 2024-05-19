@@ -24,8 +24,10 @@ endfunction()
 
 # Common source files
 set(modulator_sources
-    cpp_sources/modulator.hpp
-    cpp_sources/modulator.cpp
+    cpp_sources/deadtime/deadtimecontroller.hpp
+    cpp_sources/deadtime/deadtimecontroller.cpp
+    cpp_sources/modulator/modulator.hpp
+    cpp_sources/modulator/modulator.cpp
 )
 
 # Specific source files for each library

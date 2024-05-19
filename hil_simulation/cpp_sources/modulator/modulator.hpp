@@ -1,30 +1,9 @@
 #ifndef MODULATOR_H
 #define MODULATOR_H
-double calculate_carrier(double t, double Ts);
-
 #include <cmath>
+#include "../deadtime/deadtimecontroller.hpp"
 
-class DeadtimeController {
-public:
-    DeadtimeController(double gate_hi_voltage, double gate_lo_voltage, double deadtime);
-
-    void update(double t, double pwm);
-    double getPWM_hi() const;
-    double getPWM_lo() const;
-
-private:
-    double gate_hi_voltage;
-    double gate_lo_voltage;
-    double deadtime;
-    double previous_pwm;
-    double PWM_hi;
-    double PWM_lo;
-    double deadtime_start;
-    double deadtime_stop;
-
-    void applyDeadtime(double t);
-};
-
+double calculate_carrier(double t, double Ts);
 
 class Modulator {
 public:
@@ -47,7 +26,6 @@ private:
     double previous_duty;
     double carrier;
     double previous_carrier;
-    double interrupt_time;
 
     double PWM;
 
@@ -56,4 +34,3 @@ private:
 };
 
 #endif // MODULATOR_H
-

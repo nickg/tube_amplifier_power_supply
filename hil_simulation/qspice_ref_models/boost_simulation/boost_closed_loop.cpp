@@ -21,7 +21,7 @@ double
     i_error = 0.0,
     i_term = 0.0;
 
-#include "../../cpp_sources/modulator.hpp"
+#include "../../cpp_sources/modulator/modulator.hpp"
 Modulator modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 #include "../../cpp_sources/feedback_control/current_control.hpp"
 

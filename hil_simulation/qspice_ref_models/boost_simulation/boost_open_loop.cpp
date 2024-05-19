@@ -1,5 +1,5 @@
 #include <cmath>
-#include "modulator.hpp"
+#include "../../cpp_sources/modulator/modulator.hpp"
 
 const double
     gate_hi_voltage = 6.0   ,
