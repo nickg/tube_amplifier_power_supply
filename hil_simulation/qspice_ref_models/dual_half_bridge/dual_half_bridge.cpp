@@ -7,6 +7,9 @@
 #include "../../cpp_sources/modulator/modulator.hpp"
 #include "../../cpp_sources/carrier_generation/carrier_generation.hpp"
 
+#include "../../cpp_sources/feedback_control/pi_control/pi_control.hpp"
+
+
 const double
     gate_hi_voltage = 6.0   ,
     gate_lo_voltage = -3.3  ,
@@ -34,6 +37,12 @@ union uData
 
 Modulator modulator1(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 Modulator modulator2(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
+
+const double 
+    vkp = 0.15,
+    vki = 0.01;
+
+PIController voltage_control(vkp, vki, 0.25);
 
 double iterm = 0;
 
@@ -67,8 +76,8 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
     if (modulator2.synchronous_sample_called(t))  // rising_edge of clock
     {
         double verror = 400-vdc;
-        double piout = 0.15* verror + iterm;
-        iterm = iterm + verror * 0.01;
+        double piout = vkp* verror + iterm;
+        iterm = iterm + verror * vki;
         modulator1.set_phase(piout);
         vout = piout;
 
@@ -84,6 +93,7 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
    gate3 = modulator2.getPWM();
    gate4 = modulator2.getPWMLo();
    iload = 0.0;
-   if (t > 5e-3) iload = -1.0;
+   if (t > 3e-3) iload = -1.0;
+   if (t > 6e-3) iload = 1.0;
 
 }

@@ -61,6 +61,8 @@ set(boost_voltage_closed_loop_sources
 
 set(dual_half_bridge_sources
     ${modulator_sources}
+    cpp_sources/feedback_control/pi_control/pi_control.hpp
+    cpp_sources/feedback_control/pi_control/pi_control.cpp
     qspice_ref_models/dual_half_bridge/dual_half_bridge.cpp
 )
 
