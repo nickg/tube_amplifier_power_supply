@@ -3,7 +3,7 @@
 
 class VoltageController {
 public:
-    VoltageController(double vkp = 0.3 * 0.9, double vki = 0.3 * 0.025, double upper_limit = 7.0, double lower_limit = -7.0);
+    VoltageController(double vkp = 1.0/4.0, double vki = 1.0/128.0, double upper_limit = 7.0, double lower_limit = -7.0);
 
     double compute(double v_error);
 

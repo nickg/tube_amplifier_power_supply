@@ -11,8 +11,7 @@ const double
     Ts              = 1.0/30.0e3 ,
     duty            = 0.5;
 
-#include "../../cpp_sources/modulator.hpp"
-Modulator modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
+#include "../../cpp_sources/modulator/modulator.hpp"
 
 union uData
 {
@@ -31,11 +30,13 @@ union uData
    unsigned char *bytes;
 };
 
-// int DllMain() must exist and return 1 for a process to load the .DLL
-// See https://docs.microsoft.com/en-us/windows/win32/dlls/dllmain for more information.
+
+/* Modulator modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime); */
+
 int __stdcall DllMain(void *module, unsigned int reason, void *reserved) { return 1; }
 
 // #undef pin names lest they collide with names in any header file(s) you might include.
+#undef vdc
 #undef gate1
 #undef gate2
 #undef carrier2
@@ -44,7 +45,6 @@ int __stdcall DllMain(void *module, unsigned int reason, void *reserved) { retur
 #undef gate3
 #undef gate4
 #undef vout
-#undef vdc
 
 extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, union uData *data)
 {
@@ -57,9 +57,8 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
    double &gate3    = data[6].d; // output
    double &gate4    = data[7].d; // output
    double &vout     = data[8].d; // output
-
 // Implement module evaluation code here:
 
-   modulator.update(t);
-
+   /* modulator.update(t); */
+   vin = 400.0;
 }
