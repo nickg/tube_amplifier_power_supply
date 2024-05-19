@@ -3,8 +3,6 @@
 #include <cmath>
 #include "../deadtime/deadtimecontroller.hpp"
 
-double calculate_carrier(double t, double Ts);
-
 class Modulator {
 public:
     Modulator(double Ts, double duty, double gate_hi_voltage, double gate_lo_voltage, double deadtime);

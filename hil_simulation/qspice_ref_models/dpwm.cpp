@@ -8,6 +8,7 @@
 // gcc -c -o dpwm.o dpwm.cpp & gcc -o dpwm.dll -s -shared dpwm.o -Wl,--subsystem,windows
 #include <cmath>
 #include "../cpp_sources/modulator/modulator.hpp"
+#include "../cpp_sources/carrier_generation/carrier_generation.hpp"
 
 const double
     gate_hi_voltage = 6.0   ,
