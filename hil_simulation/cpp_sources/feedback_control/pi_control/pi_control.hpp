@@ -3,9 +3,9 @@
 
 #include <cmath>
 
-class PIController {
+class pi_control {
 public:
-    PIController(double kp, double ki, double pi_limit);
+    pi_control(double kp, double ki, double pi_limit);
     double calculate_pi_out(double error, double lower_limit, double upper_limit);
 
 protected:

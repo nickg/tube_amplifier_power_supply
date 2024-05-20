@@ -6,7 +6,6 @@
 #include <cmath>
 #include "../../cpp_sources/modulator/modulator.hpp"
 #include "../../cpp_sources/carrier_generation/carrier_generation.hpp"
-
 #include "../../cpp_sources/feedback_control/pi_control/pi_control.hpp"
 
 
@@ -16,6 +15,17 @@ const double
     deadtime        = 50e-9 ,
     Ts              = 1.0/100.0e3 ,
     duty            = 0.5;
+
+Modulator modulator1(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
+Modulator modulator2(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
+
+const double 
+    vkp = 0.15,
+    vki = 0.01;
+
+pi_control voltage_control(vkp, vki, 1.0);
+
+double iterm = 0;
 
 union uData
 {
@@ -33,18 +43,6 @@ union uData
    char *str;
    unsigned char *bytes;
 };
-
-
-Modulator modulator1(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
-Modulator modulator2(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
-
-const double 
-    vkp = 0.15,
-    vki = 0.01;
-
-PIController voltage_control(vkp, vki, 0.25);
-
-double iterm = 0;
 
 int __stdcall DllMain(void *module, unsigned int reason, void *reserved) { return 1; }
 
@@ -73,10 +71,10 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
    double &iload    = data[9].d; // output
 // Implement module evaluation code here:
 
-    if (modulator2.synchronous_sample_called(t))  // rising_edge of clock
+    if (modulator2.synchronous_sample_called(t))  // carrier peak reached //
     {
         double verror = 400-vdc;
-        double piout = vkp* verror + iterm;
+        double piout = voltage_control.calculate_pi_out(verror, -0.2, 0.2);
         iterm = iterm + verror * vki;
         modulator1.set_phase(piout);
         vout = piout;
@@ -94,6 +92,9 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
    gate4 = modulator2.getPWMLo();
    iload = 0.0;
    if (t > 3e-3) iload = -1.0;
-   if (t > 6e-3) iload = 1.0;
+   if (t > 4.5e-3) iload = 1.0;
+   if (t > 5.5e-3) iload = -5.0;
+   if (t > 7.5e-3) iload = 5.0;
+   if (t > 9.5e-3) iload = -1.0;
 
 }
