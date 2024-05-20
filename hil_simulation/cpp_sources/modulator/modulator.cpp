@@ -35,6 +35,10 @@ void Modulator::set_phase(double set_phase_to)
     phase = set_phase_to;
 }
 
+void Modulator::set_frequency(double set_frequency_to)
+{
+    Ts = 1.0/set_frequency_to;
+}
 
 double Modulator::getPWM() const {
     return deadtimecontrol.getPWM_hi();

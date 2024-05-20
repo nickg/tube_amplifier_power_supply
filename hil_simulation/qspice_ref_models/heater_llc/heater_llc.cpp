@@ -9,15 +9,15 @@ const double
     gate_hi_voltage = 6.0   ,
     gate_lo_voltage = -3.3  ,
     deadtime        = 50e-9 ,
-    Ts              = 1.0/150.0e3 ,
+    Ts              = 1.0/110.0e3 ,
     duty            = 0.5;
 
 Modulator modulator1(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 Modulator modulator2(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 
 const double 
-    vkp = 0.15,
-    vki = 0.01;
+    vkp = 0.0005,
+    vki = 0.0005;
 
 pi_control voltage_control(vkp, vki, 1.0);
 
@@ -67,12 +67,18 @@ extern "C" __declspec(dllexport) void heater_llc(void **opaque, double t, union 
 
     if (modulator2.synchronous_sample_called(t))
     {
-        double verror = 400-vdc;
-        const double low_limit = -0.2;
-        const double high_limit = 0.2;
+        double verror = 6.3-vdc;
+        const double low_limit = -1;
+        const double high_limit = 1;
         double piout = voltage_control.calculate_pi_out(verror, low_limit, high_limit);
         vout = piout;
+
     }
+    /* if (modulator1.synchronous_sample_called(t)) */
+    /* { */
+    /*     modulator1.set_frequency(175e3 - (50e3*vout)); */
+    /* } */
+
 
    vin = 400.0;
    modulator1.update(t);
@@ -86,7 +92,8 @@ extern "C" __declspec(dllexport) void heater_llc(void **opaque, double t, union 
    iload = 0.0;
 
    // excitation 
-   if (t > 2.5e-3)   iload = -1.5;
+   iload = -1.0;
+   if (t > 1.5e-3)   iload = -8.5;
    /* if (t > 4.5e-3) iload = 1.0; */
    /* if (t > 5.5e-3) iload = -5.0; */
    /* if (t > 7.5e-3) iload = 5.0; */

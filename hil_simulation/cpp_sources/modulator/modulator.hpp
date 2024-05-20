@@ -10,6 +10,7 @@ public:
     void update(double t);
     void set_duty(double set_duty_to);
     void set_phase(double set_phase_to);
+    void set_frequency(double set_frequency_to);
     bool synchronous_sample_called(double t) const;
 
     double getPWM() const;
