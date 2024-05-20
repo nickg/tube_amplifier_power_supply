@@ -1,4 +1,4 @@
-// Automatically generated C++ file on Sat May 18 10:58:14 2024
+// Automatically generated C++ file on Mon May 20 07:05:37 2024
 //
 #include <cmath>
 #include "../../cpp_sources/modulator/modulator.hpp"
@@ -9,7 +9,7 @@ const double
     gate_hi_voltage = 6.0   ,
     gate_lo_voltage = -3.3  ,
     deadtime        = 50e-9 ,
-    Ts              = 1.0/100.0e3 ,
+    Ts              = 1.0/150.0e3 ,
     duty            = 0.5;
 
 Modulator modulator1(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
@@ -20,8 +20,6 @@ const double
     vki = 0.01;
 
 pi_control voltage_control(vkp, vki, 1.0);
-
-double iterm = 0;
 
 union uData
 {
@@ -53,7 +51,7 @@ int __stdcall DllMain(void *module, unsigned int reason, void *reserved) { retur
 #undef gate4
 #undef vout
 
-extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, union uData *data)
+extern "C" __declspec(dllexport) void heater_llc(void **opaque, double t, union uData *data)
 {
    double  vdc      = data[0].d; // input
    double &gate1    = data[1].d; // output
@@ -73,8 +71,6 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
         const double low_limit = -0.2;
         const double high_limit = 0.2;
         double piout = voltage_control.calculate_pi_out(verror, low_limit, high_limit);
-        iterm = iterm + verror * vki;
-        modulator1.set_phase(piout);
         vout = piout;
     }
 
@@ -85,15 +81,15 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
    carrier2 = modulator2.get_carrier();
    gate1 = modulator1.getPWM();
    gate2 = modulator1.getPWMLo();
-   gate3 = modulator2.getPWM();
-   gate4 = modulator2.getPWMLo();
+   gate3 = gate_lo_voltage;
+   gate4 = gate_lo_voltage;
    iload = 0.0;
 
    // excitation 
-   if (t > 3e-3)   iload = -1.0;
-   if (t > 4.5e-3) iload = 1.0;
-   if (t > 5.5e-3) iload = -5.0;
-   if (t > 7.5e-3) iload = 5.0;
-   if (t > 9.5e-3) iload = -1.0;
+   if (t > 2.5e-3)   iload = -1.5;
+   /* if (t > 4.5e-3) iload = 1.0; */
+   /* if (t > 5.5e-3) iload = -5.0; */
+   /* if (t > 7.5e-3) iload = 5.0; */
+   /* if (t > 9.5e-3) iload = -1.0; */
 
 }
