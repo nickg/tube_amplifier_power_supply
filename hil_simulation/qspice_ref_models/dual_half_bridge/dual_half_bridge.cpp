@@ -74,7 +74,9 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
     if (modulator2.synchronous_sample_called(t))  // carrier peak reached //
     {
         double verror = 400-vdc;
-        double piout = voltage_control.calculate_pi_out(verror, -0.2, 0.2);
+        const double low_limit = -0.2;
+        const double high_limit = 0.2;
+        double piout = voltage_control.calculate_pi_out(verror, low_limit, high_limit);
         iterm = iterm + verror * vki;
         modulator1.set_phase(piout);
         vout = piout;
@@ -91,6 +93,7 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
    gate3 = modulator2.getPWM();
    gate4 = modulator2.getPWMLo();
    iload = 0.0;
+
    if (t > 3e-3) iload = -1.0;
    if (t > 4.5e-3) iload = 1.0;
    if (t > 5.5e-3) iload = -5.0;
