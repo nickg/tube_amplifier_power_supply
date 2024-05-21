@@ -16,8 +16,8 @@ Modulator modulator1(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 Modulator modulator2(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 
 const double 
-    vkp = 0.0005,
-    vki = 0.0005;
+    vkp = 0.014,
+    vki = 0.01;
 
 pi_control voltage_control(vkp, vki, 1.0);
 
@@ -65,19 +65,18 @@ extern "C" __declspec(dllexport) void heater_llc(void **opaque, double t, union 
    double &iload    = data[9].d; // output
 // Implement module evaluation code here:
 
-    if (modulator2.synchronous_sample_called(t))
-    {
-        double verror = 6.3-vdc;
+    if (modulator2.synchronous_sample_called(t)) {
+        double verror = 6.0-vdc;
         const double low_limit = -1;
         const double high_limit = 1;
         double piout = voltage_control.calculate_pi_out(verror, low_limit, high_limit);
         vout = piout;
 
     }
-    /* if (modulator1.synchronous_sample_called(t)) */
-    /* { */
-    /*     modulator1.set_frequency(175e3 - (50e3*vout)); */
-    /* } */
+    if (modulator1.synchronous_sample_called(t)) {
+        modulator1.set_frequency(175e3 - (70e3*vout));
+        /* modulator1.set_phase((175e3 - (70e3*vout))*0.5); */
+    }
 
 
    vin = 400.0;
@@ -92,8 +91,8 @@ extern "C" __declspec(dllexport) void heater_llc(void **opaque, double t, union 
    iload = 0.0;
 
    // excitation 
-   iload = -1.0;
-   if (t > 1.5e-3)   iload = -8.5;
+   iload = -8.0;
+   /* if (t > 2.5e-3) iload = -8.5; */
    /* if (t > 4.5e-3) iload = 1.0; */
    /* if (t > 5.5e-3) iload = -5.0; */
    /* if (t > 7.5e-3) iload = 5.0; */

@@ -73,6 +73,17 @@ set(heater_llc_sources
     qspice_ref_models/heater_llc/heater_llc.cpp
 )
 
+set(guitar_power_supply_sources
+    ${modulator_sources}
+    cpp_sources/feedback_control/pi_control/pi_control.hpp
+    cpp_sources/feedback_control/pi_control/pi_control.cpp
+    cpp_sources/feedback_control/current_control.hpp
+    cpp_sources/feedback_control/current_control.cpp
+    cpp_sources/feedback_control/voltage_control.hpp
+    cpp_sources/feedback_control/voltage_control.cpp
+    qspice_ref_models/guitar_power_supply/guitar_power_supply.cpp
+)
+
 # Create shared libraries and specify destination folders
 create_shared_library(dpwm "${dpwm_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models)
 create_shared_library(boost_open_loop "${boost_open_loop_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models/boost_simulation)
@@ -80,3 +91,4 @@ create_shared_library(boost_closed_loop "${boost_closed_loop_sources}" ${CMAKE_S
 create_shared_library(boost_voltage_closed_loop "${boost_voltage_closed_loop_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models/boost_simulation)
 create_shared_library(dual_half_bridge "${dual_half_bridge_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models/dual_half_bridge)
 create_shared_library(heater_llc "${heater_llc_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models/heater_llc)
+create_shared_library(guitar_power_supply "${guitar_power_supply_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models/guitar_power_supply)

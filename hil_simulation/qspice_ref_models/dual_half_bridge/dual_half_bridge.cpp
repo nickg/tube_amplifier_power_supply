@@ -21,8 +21,6 @@ const double
 
 pi_control voltage_control(vkp, vki, 1.0);
 
-double iterm = 0;
-
 union uData
 {
    bool b;
@@ -73,7 +71,6 @@ extern "C" __declspec(dllexport) void dual_half_bridge(void **opaque, double t, 
         const double low_limit = -0.2;
         const double high_limit = 0.2;
         double piout = voltage_control.calculate_pi_out(verror, low_limit, high_limit);
-        iterm = iterm + verror * vki;
         modulator1.set_phase(piout);
         vout = piout;
     }
