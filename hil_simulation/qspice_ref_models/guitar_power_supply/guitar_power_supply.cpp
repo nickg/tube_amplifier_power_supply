@@ -4,13 +4,15 @@
 //
 //    dmc -mn -WD guitar_power_supply.cpp kernel32.lib
 
+// use constants from cmath library
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 const double
     gate_hi_voltage = 6.0   ,
     gate_lo_voltage = -3.3  ,
     deadtime        = 50e-9 ,
-    Ts              = 1.0/30.0e3 ;
+    Ts              = 1.0/135.0e3 ;
 
 double
     duty                = 0.5 ,
@@ -19,13 +21,14 @@ double
     i_term              = 0.0 ,
     prev_sample_trigger = 0.0 ,
     sampletime          = 0.0, 
+    iref = 0.0,
     vref = 200.0;
 
 #include "../../cpp_sources/modulator/modulator.hpp"
 Modulator pfc_modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 
 const
-    double ikp = 16.0;
+    double ikp = 64.0;
     double iki = 8.0;
     double min_duty = 0.1;
     double max_duty = 0.9;
@@ -33,8 +36,14 @@ const
 #include "../../cpp_sources/feedback_control/current_control.hpp"
 CurrentController current_control(ikp, iki, min_duty, max_duty);
 
+double 
+    pfc_vkp     = 0.005*1.0/4.0   ,
+    pfc_vki     = 0.005*1.0/128.0 ,
+    upper_limit = 7.0       ,
+    lower_limit = 0      ;
+
 #include "../../cpp_sources/feedback_control/voltage_control.hpp"
-VoltageController voltage_control;
+VoltageController voltage_control(pfc_vkp, pfc_vki, upper_limit, lower_limit);
 // dhb 
 //
 #include "../../cpp_sources/feedback_control/pi_control/pi_control.hpp"
@@ -108,15 +117,16 @@ extern "C" __declspec(dllexport) void guitar_power_supply(void **opaque, double 
    double &sampled_current = data[11].d; // output
    double &vin             = data[12].d; // output
    double &dhb_load        = data[13].d; // output
-   double &PFC_load        = data[14].d; // output
+   double &iref        = data[14].d; // output
 
 // Implement module evaluation code here:
 
     if (pfc_modulator.synchronous_sample_called(t))
     {
-        double v_error = vref - dclink;
+        double v_error = 400 - dclink;
 
-        double iref = voltage_control.compute(v_error);
+        iref = voltage_control.compute(v_error);
+        iref = iref*vin/230;
 
         const double shunt_res = 0.001;
         sampled_current = (l2_current - l1_current)/shunt_res;
@@ -134,7 +144,7 @@ extern "C" __declspec(dllexport) void guitar_power_supply(void **opaque, double 
 
     if (modulator2.synchronous_sample_called(t))
     {
-        double verror = 200-vdc_dhb;
+        double verror = 400-vdc_dhb;
         const double low_limit = -0.2;
         const double high_limit = 0.2;
         double piout = dhb_voltage_control.calculate_pi_out(verror, low_limit, high_limit);
@@ -149,8 +159,8 @@ extern "C" __declspec(dllexport) void guitar_power_supply(void **opaque, double 
    dhb_pwmlo2 = modulator2.getPWMLo();
 
     // model excitement
-    if (t > 00.0e-3) vin      = 100.0;
-    /* if (t > 20.0e-3) PFC_load = -2.0; */
+    if (t > 00.0e-3) vin      = 325*fabs(sin(t*2*M_PI*50));
+    if (t > 30.0e-3) dhb_load = -1.0;
     /* if (t > 30.0e-3) vref     = 120.0; */
     /* if (t > 40.0e-3) vin      = 130.0; */
     /* if (t > 50.0e-3) vref     = 180.0; */

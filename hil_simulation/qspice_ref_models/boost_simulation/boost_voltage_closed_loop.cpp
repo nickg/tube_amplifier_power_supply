@@ -37,8 +37,14 @@ const
 #include "../../cpp_sources/feedback_control/current_control.hpp"
 CurrentController current_control(ikp, iki, min_duty, max_duty);
 
+double 
+    vkp         = 1.0/4.0   ,
+    vki         = 1.0/128.0 ,
+    upper_limit = 7.0       ,
+    lower_limit = -7.0      ;
+
 #include "../../cpp_sources/feedback_control/voltage_control.hpp"
-VoltageController voltage_control;
+VoltageController voltage_control(vkp, vki, upper_limit, lower_limit);
 
 union uData
 {
