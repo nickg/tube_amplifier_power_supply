@@ -16,21 +16,20 @@ const double
 
 double
     duty                = 0.5 ,
-    iload               = 0   ,
+    PFC_load            = 0   ,
     sampled_current     = 0   ,
-    i_term              = 0.0 ,
     prev_sample_trigger = 0.0 ,
-    sampletime          = 0.0, 
-    iref = 0.0,
-    vref = 200.0;
+    sampletime          = 0.0,
+    iref                = 0.0,
+    vref                = 200.0;
 
 #include "../../cpp_sources/modulator/modulator.hpp"
 Modulator pfc_modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 
 const
     double ikp = 128.0;
-    double iki = 4.0;
-    double min_duty = 0.1;
+    double iki = 8.0;
+    double min_duty = 0.07;
     double max_duty = 0.9;
 
 #include "../../cpp_sources/feedback_control/current_control.hpp"
@@ -38,7 +37,7 @@ CurrentController current_control(ikp, iki, min_duty, max_duty);
 
 double 
     pfc_vkp     = 0.1*1.0/4.0   ,
-    pfc_vki     = 0.000625*1.0/128.0 ,
+    pfc_vki     = 0.003125*1.0/128.0 ,
     upper_limit = 7.0             ,
     lower_limit = 0      ;
 
@@ -117,7 +116,7 @@ extern "C" __declspec(dllexport) void guitar_power_supply(void **opaque, double 
    double &sampled_current = data[11].d; // output
    double &vin             = data[12].d; // output
    double &dhb_load        = data[13].d; // output
-   double &iref        = data[14].d; // output
+   double &PFC_load        = data[14].d; // output
 
 // Implement module evaluation code here:
 
@@ -160,12 +159,13 @@ extern "C" __declspec(dllexport) void guitar_power_supply(void **opaque, double 
 
     // model excitement
     if (t > 00.0e-3) vin      = 325*fabs(sin(t*2*M_PI*50));
-    if (t > 30.0e-3) dhb_load = -1.0;
+    if (t > 30.0e-3) dhb_load = -100.0/400.0;
+    if (t > 40.0e-3) dhb_load = -1.0;
+    /* if (t > 60.0e-3) dhb_load = -60.0/400.0; */
     /* if (t > 30.0e-3) vref     = 120.0; */
     /* if (t > 40.0e-3) vin      = 130.0; */
     /* if (t > 50.0e-3) vref     = 180.0; */
     /* if (t > 65.0e-3) PFC_load = 10.0; */
-    /* if (t > 70.0e-3) PFC_load = -10.0; */
     /* if (t > 80.0e-3) PFC_load = 0.0; */
 
     /* dhb_load = 0; */
