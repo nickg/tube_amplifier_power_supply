@@ -27,8 +27,8 @@ double
 Modulator pfc_modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 
 const
-    double ikp = 128.0;
-    double iki = 8.0;
+    double ikp      = 128.0;
+    double iki      = 8.0;
     double min_duty = 0.07;
     double max_duty = 0.9;
 

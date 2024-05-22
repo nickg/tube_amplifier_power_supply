@@ -97,5 +97,4 @@ extern "C" __declspec(dllexport) void heater_llc(void **opaque, double t, union 
    /* if (t > 5.5e-3) iload = -5.0; */
    /* if (t > 7.5e-3) iload = 5.0; */
    /* if (t > 9.5e-3) iload = -1.0; */
-
 }
