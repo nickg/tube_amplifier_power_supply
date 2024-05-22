@@ -28,8 +28,8 @@ double
 Modulator pfc_modulator(Ts, duty, gate_hi_voltage, gate_lo_voltage, deadtime);
 
 const
-    double ikp = 64.0;
-    double iki = 8.0;
+    double ikp = 128.0;
+    double iki = 4.0;
     double min_duty = 0.1;
     double max_duty = 0.9;
 
@@ -37,9 +37,9 @@ const
 CurrentController current_control(ikp, iki, min_duty, max_duty);
 
 double 
-    pfc_vkp     = 0.005*1.0/4.0   ,
-    pfc_vki     = 0.005*1.0/128.0 ,
-    upper_limit = 7.0       ,
+    pfc_vkp     = 0.1*1.0/4.0   ,
+    pfc_vki     = 0.000625*1.0/128.0 ,
+    upper_limit = 7.0             ,
     lower_limit = 0      ;
 
 #include "../../cpp_sources/feedback_control/voltage_control.hpp"
