@@ -61,7 +61,7 @@ extern "C" __declspec(dllexport) void heater_llc(void **opaque, double t, union 
    double  vdc      = data[0].d; // input
    double &gate1    = data[1].d; // output
    double &gate2    = data[2].d; // output
-   double &carrier  = data[3].d; // output
+   double &carrier2 = data[3].d; // output
    double &vin      = data[4].d; // output
    double &carrier1 = data[5].d; // output
    double &gate3    = data[6].d; // output
@@ -71,7 +71,7 @@ extern "C" __declspec(dllexport) void heater_llc(void **opaque, double t, union 
 // Implement module evaluation code here:
 
     if (modulator2.synchronous_sample_called(t)) {
-        double verror = 6.0-vdc;
+        double verror = 6.3-vdc;
         const double low_limit = -1;
         const double high_limit = 1;
         double piout = voltage_control.calculate_pi_out(verror, low_limit, high_limit);
@@ -100,7 +100,7 @@ extern "C" __declspec(dllexport) void heater_llc(void **opaque, double t, union 
    modulator1.update(t);
    modulator2.update(t);
    carrier1 = modulator1.get_carrier();
-   /* carrier2 = modulator2.get_carrier(); */
+   carrier2 = modulator2.get_carrier();
    gate1 = deadtime.getPWM_hi();
    gate2 = deadtime.getPWM_lo();
    gate3 = gate_lo_voltage;
