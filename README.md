@@ -1,6 +1,6 @@
 # Tube amplifier power supply
-<img src="figures/putkipoweri.jpg" alt="Tube Power" style="width:80%; height:80%;">
-This is a repository for a tube amplifier power supply FPGA control. The power supply consists of a PFC, 6.3V/10A LLC, 420V/1A dual active half bridge and an fpga to contorl them. The auxiliary supplies are also provided by a DCM flyback converter built around IW1818. This power supply was designed originally during university studies and finished in 2017. For more detailed information, please refer to the [report](tube_amp_power.pdf)
+<img src="docs/figures/putkipoweri.jpg" alt="Tube Power" style="width:80%; height:80%;">
+This is a repository for a tube amplifier power supply FPGA control. The power supply consists of a PFC, 6.3V/10A LLC, 420V/1A dual active half bridge and an fpga to contorl them. The auxiliary supplies are also provided by a DCM flyback converter built around IW1818. This power supply was designed originally during university studies and finished in 2017. For more detailed information, please refer to the [report](docs/tube_amp_power.pdf)
 
 The power supply was never installed and the original repository was lost at some point hence this repository picks up at the point which was recovered from some old copy.
 
