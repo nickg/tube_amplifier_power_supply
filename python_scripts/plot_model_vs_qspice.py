@@ -27,10 +27,10 @@ vhdl_data = pd.read_csv(path_to_this_file + '/../vunit_out/rtl_model_tube_power_
 
 fig1, (axT, axB) = plt.subplots(2,1,sharex=True,constrained_layout=True)
 
-df.plot(ax=axT, x="Time",  y="V(vdc)", label="V(vout)")
-vhdl_data.plot(ax=axT, x="time", y="volt", label="voltage")
-df.plot(ax=axB, x="Time",  y="V(sampled_current)", label="I(L1)")
-vhdl_data.plot(ax=axB, x="time", y="curr", label="current")
+df.plot(ax=axT, x="Time",  y="V(vdc)", label="QSPICE voltage")
+vhdl_data.plot(ax=axT, x="time", y="volt", label="vhdl voltage")
+df.plot(ax=axB, x="Time",  y="V(sampled_current)", label="QSPICE current")
+vhdl_data.plot(ax=axB, x="time", y="curr", label="vhdl current")
 
 plt.show()
 plt.close('all')
