@@ -29,6 +29,9 @@ how to run build
 1. mkdir build
 2. cd build
 3. cmake -G "Visual Studio 17 2022" -DCMAKE_GENERATOR_PLATFORM=Win32 ..
+4. cmake --build .
+
+after running cmake --build . all dll will be built and copied to the folders where the qspice simulations hence the simulations can be run with either the included plot_<simulation>.py or directly using qspice ide.
 
 The QSPICE simulations can be found in hil_simulation/qspice_ref_models/
 
