@@ -7,7 +7,7 @@ For more detailed information, please refer to the [PDF documentation](docs/tube
 The power supply was never installed and the original repository was lost at some point hence this repository picks up at the point which was recovered from some old copy.
 
 ## hVHDL libraries
- [hvhdl project on GitHub](https://github.com/hvhdl/hvhdl) has the required fixed and floating point math libraries and microcode processor libraries so we will refactor the old control code to use them. The hVHDL libraries come with VUnit tests hence the code is easier to refactor to use the existing tested libraries than to simulate the functionality with the implementations that are present in this repository.
+ [hvhdl project on GitHub](https://github.com/hvhdl) has the required fixed and floating point math libraries and microcode processor libraries so we will refactor the old control code to use them. The hVHDL libraries come with VUnit tests hence the code is easier to refactor to use the existing tested libraries than to simulate the functionality with the implementations that are present in this repository.
 
 ## HIL simulation and its verification against QSPICE simulation
 Since the system is relatively complicated, a HIL simulation will be created to test overall control and trip functionality with target hardware but without full power. The VHDL HIL simulation models are verified by comparing the HIL simulation resultswith same simulations that are run using QSPICE. QSPICE allows us to write the control and modulation code in C++ which are compiled to DLL and run inside the spice simulation. 
