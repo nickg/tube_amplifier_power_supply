@@ -10,8 +10,7 @@ The power supply was never installed and the original repository was lost at som
  [hvhdl project on GitHub](https://github.com/hvhdl) has the required fixed and floating point math libraries and microcode processor libraries so we will refactor the old control code to use them. The hVHDL libraries come with VUnit tests hence the code is easier to refactor to use the existing tested libraries than to simulate the functionality with the implementations that are present in this repository.
 
 ## HIL simulation and its verification against QSPICE simulation
-<img src="docs/figures/boost_qspice_vs_vhdl.png" alt="Boost simulations" style="width:80%; height:80%;">
->>>>>>> 9433e8c (add boost simulation)
+<img src="docs/figures/boost_qspice_vs_vhdl.png" alt="Boost simulations" style="width:40%; height:40%;">
 Since the system is relatively complicated, a HIL simulation will be created to test overall control and trip functionality with target hardware but without full power. The VHDL HIL simulation models are verified by comparing the HIL simulation resultswith same simulations that are run using QSPICE. QSPICE allows us to write the control and modulation code in C++ which are compiled to DLL and run inside the spice simulation. 
 
 The HiL simulation will be done using the hVHDL microcode processor libraries in order to run the simulation in floating point. There are various versions of the control hardware available so we will at least run it using Spartan 7 and Cyclone 10 LP.
