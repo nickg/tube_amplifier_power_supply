@@ -17,6 +17,8 @@ double
     iload           = 0   ,
     sampled_current = 0 ;
 
+double v_error = 0;
+
 double
     i_term = 0.0,
     prev_sample_trigger = 0.0,
@@ -80,7 +82,7 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
    double uout             = data[2].d; // input
    double &PWM             = data[3].d; // output
    double &PWM_lo          = data[4].d; // output
-   double &carrier         = data[5].d; // output
+   double &v_error         = data[5].d; // output
    double &iload           = data[6].d; // output
    double &sampled_current = data[7].d; // output
    double &vin             = data[8].d; // output
@@ -92,7 +94,7 @@ extern "C" __declspec(dllexport) void boost_voltage_closed_loop(void **opaque, d
         double vref = 200.0;
         if (t > 30.0e-3) vref = 120.0;
         if (t > 50.0e-3) vref = 180.0;
-        double v_error = vref - uout;
+        v_error = vref - uout;
 
         double iref = voltage_control.compute(v_error);
 

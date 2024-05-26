@@ -225,7 +225,7 @@ begin
     phase_modulator_clocks <= (core_clock     => core_clock,
                               modulator_clock => modulator_clock);
 
-    u_phase_modulator : phase_modulator
+    u_phase_modulator : entity work.phase_modulator
     generic map(g_carrier_max_value)
     port map (
         phase_modulator_clocks,

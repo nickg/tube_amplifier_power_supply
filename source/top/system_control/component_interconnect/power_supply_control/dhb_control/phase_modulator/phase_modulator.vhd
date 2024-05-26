@@ -21,15 +21,14 @@ architecture rtl of phase_modulator is
 
     alias core_clock      : std_logic is phase_modulator_clocks.core_clock;
     alias modulator_clock : std_logic is phase_modulator_clocks.modulator_clock;
-    signal reset_n        : std_logic;
 
-    signal input_phase_buffer : integer range -2**11 to 2**11-1;
+    signal input_phase_buffer : integer range -2**11 to 2**11-1 := 0;
 
-    signal dhb_master_carrier    : uint12;
-    signal dhb_primary_carrier   : uint12;
-    signal dhb_secondary_carrier : uint12;
-    signal primary_phase_shift   : uint12;
-    signal secondary_phase_shift : uint12;
+    signal dhb_master_carrier    : uint12 := 0;
+    signal dhb_primary_carrier   : uint12 := 0;
+    signal dhb_secondary_carrier : uint12 := 0;
+    signal primary_phase_shift   : uint12 := 0;
+    signal secondary_phase_shift : uint12 := 0;
 
     signal primary_voltage : std_logic;
     signal secondary_voltage : std_logic;
@@ -78,7 +77,7 @@ begin
                 primary_phase_shift <= 0;
             end if;
         --------------------------------------------------
-            dhb_master_carrier <= phase_modulator_data_in.carrier;
+            dhb_master_carrier <= 0;
 
         --------------------------------------------------
             dhb_primary_carrier <= dhb_primary_carrier + 1;
@@ -96,8 +95,6 @@ begin
                 primary_voltage <= low;
             end if;
         --------------------------------------------------
-
-
 
         --------------------------------------------------
             dhb_secondary_carrier <= dhb_secondary_carrier + 1;
@@ -128,7 +125,8 @@ begin
                             half_bridge_voltage => primary_voltage,
                             tg_load_deadtime    => phase_modulator_data_in.tg_load_deadtime,
                             deadtime_cycles     => phase_modulator_data_in.deadtime);
-    primary_deadtime : deadtime
+
+    primary_deadtime : entity work.deadtime
     port map( deadtime_clocks,
     	  deadtime_FPGA_out(1),
     	  deadtime_data_in(1));
@@ -141,7 +139,7 @@ begin
                             tg_load_deadtime   => phase_modulator_data_in.tg_load_deadtime,
                             deadtime_cycles    => phase_modulator_data_in.deadtime);
 
-    secondary_deadtime : deadtime
+    secondary_deadtime : entity work.deadtime
     port map( deadtime_clocks,
     	  deadtime_FPGA_out(2),
     	  deadtime_data_in(2));

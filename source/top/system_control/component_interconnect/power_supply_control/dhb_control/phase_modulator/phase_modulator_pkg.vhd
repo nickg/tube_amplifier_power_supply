@@ -11,38 +11,28 @@ package phase_modulator_pkg is
 
     type phase_modulator_clock_group is record
         modulator_clock : std_logic;
-        core_clock : std_logic;
+        core_clock      : std_logic;
     end record;
     
     type phase_modulator_FPGA_output_group is record
-        primary : half_bridge;
+        primary   : half_bridge;
         secondary : half_bridge;
     end record;
     
     type phase_modulator_data_input_group is record
-        carrier : integer;
-        phase : integer range -2**10 to 2**10-1;
-        dhb_is_enabled : std_logic;
-        tg_load_phase : std_logic;
+        carrier          : natural;
+        phase            : integer range -2**10 to 2**10-1;
+        dhb_is_enabled   : std_logic;
+        tg_load_phase    : std_logic;
         tg_load_deadtime : std_logic;
-        deadtime : integer range 0 to 2**12-1;
+        deadtime         : integer range 0 to 2**12-1;
     end record;
     
     type phase_modulator_data_output_group is record
         dhb_modulator_clock : std_logic;
-        core_clock : std_logic;
+        core_clock          : std_logic;
     end record;
     
-    component phase_modulator is
-        generic( g_carrier_max_value : integer);
-        port (
-            phase_modulator_clocks : in phase_modulator_clock_group;
-            phase_modulator_FPGA_out : out phase_modulator_FPGA_output_group;
-            phase_modulator_data_in : in phase_modulator_data_input_group;
-            phase_modulator_data_out : out phase_modulator_data_output_group
-        );
-    end component phase_modulator;
-
 ------------------------------------------------------------------------
     procedure set_phase ( signal dhb_input : inout phase_modulator_data_input_group;
         phase : in integer);
