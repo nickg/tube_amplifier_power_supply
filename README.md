@@ -11,7 +11,7 @@ The power supply was never installed and the original repository was lost at som
 
 ## HIL simulation and its verification against QSPICE simulation
 <img src="docs/figures/boost_qspice_vs_vhdl.png" alt="Boost simulations" style="width:40%; height:40%;">
-Since the system is relatively complicated, a HIL simulation will be created to test overall control and trip functionality with target hardware but without full power. The VHDL HIL simulation models are verified by comparing the HIL simulation resultswith same simulations that are run using QSPICE. QSPICE allows us to write the control and modulation code in C++ which are compiled to DLL and run inside the spice simulation. 
+Since the system is relatively complicated, a HIL simulation will be created to test overall control and trip functionality with target hardware but the fear of breaking things. The VHDL HIL simulation models are verified by comparing the HIL simulation resultswith same simulations that are run using QSPICE. QSPICE allows us to write the control and modulation code in C++ which are compiled to DLL and run inside the spice simulation. 
 
 The HiL simulation will be done using the hVHDL microcode processor libraries in order to run the simulation in floating point. There are various versions of the control hardware available so we will at least run it using Spartan 7 and Cyclone 10 LP.
 
