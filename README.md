@@ -4,7 +4,7 @@ This is a repository for a tube amplifier power supply FPGA control. The power s
 
 For more detailed information, please refer to the [PDF documentation](docs/tube_amp_power.pdf).
 
-The power supply was never installed and the original repository was lost at some point hence this repository picks up at the point which was recovered from some old copy.
+The power supply was never installed in the actual tube amplifier and the original repository was lost at some point hence this repository picks up at the point which was recovered from some old copy.
 
 ## hVHDL libraries
  [hvhdl project on GitHub](https://github.com/hvhdl) has the required fixed and floating point math libraries and microcode processor libraries so we will refactor the old control code to use them. The hVHDL libraries come with VUnit tests hence the code is easier to refactor to use the existing tested libraries than to simulate the functionality with the implementations that are present in this repository.
