@@ -4,19 +4,19 @@ This is a repository for a tube amplifier power supply FPGA control. The power s
 
 For more detailed information, please refer to the [PDF documentation](docs/tube_amp_power.pdf).
 
-The power supply was never installed in the actual tube amplifier and the original repository was lost at some point when changing computers and before I started using github hence this repository picks up at the point which was recovered from some old copy that I happened find from my old hardrive.
+The power supply was never installed in the actual tube amplifier and the original repository was lost at some point when changing computers hence this repository picks up at the point which was recovered from some old copy that I happened find from my old hardrive.
 
 ## hVHDL libraries
  [hvhdl project on GitHub](https://github.com/hvhdl) has the required fixed and floating point math libraries and microcode processor libraries so we will refactor the old control code to use them. The hVHDL libraries come with VUnit tests hence the code is easier to refactor to use the existing tested libraries than to simulate the functionality with the implementations that are present in this repository.
 
 ## HIL simulation and its verification against QSPICE simulation
 <img src="docs/figures/boost_qspice_vs_vhdl.png" alt="Boost simulations" style="width:40%; height:40%;">
-Since the system is relatively complicated, a HIL simulation will be created to test overall control and trip functionality with target hardware but the fear of breaking things. The VHDL HIL simulation models are verified by comparing the HIL simulation resultswith same simulations that are run using QSPICE. QSPICE allows us to write the control and modulation code in C++ which are compiled to DLL and run inside the spice simulation. 
+Since the system is relatively complicated, a HIL simulation will be created to test overall control and trip functionality with target control hardware. The VHDL HIL simulation models are verified by comparing the HIL simulation results with same simulations run using QSPICE. QSPICE allows us to write the control and modulation code in C++ which are compiled to DLL and run inside the spice simulation. 
 
 The HiL simulation will be done using the hVHDL microcode processor libraries in order to run the simulation in floating point. There are various versions of the control hardware available so we will at least run it using Spartan 7 and Cyclone 10 LP.
 
 The C++ sources for QSPICE model verification requires CMake and the .dll needs to be generated with 32bit platform. 
-Example using Visual Studio 
+Example using Visual Studio compiler
 
 cmake -G "Visual Studio 17 2022" -DCMAKE_GENERATOR_PLATFORM=Win32 ..
 
