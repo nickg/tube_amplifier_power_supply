@@ -33,7 +33,7 @@ architecture vunit_simulation of rtl_model_tube_power_tb is
     -----------------------------------
     -- simulation specific signals ----
     signal realtime : real := 0.0;
-    constant timestep : real := 128.0/128.0e6;
+    constant timestep : real := 350.0/128.0e6;
 
     signal sequencer : natural := 1;
 
@@ -47,7 +47,7 @@ architecture vunit_simulation of rtl_model_tube_power_tb is
     signal load_r : real := 400.0**2/50.0;
 
     signal r            : real := 115.0e-3;
-    signal l            : real := timestep/5.5e-6;
+    signal l            : real := timestep/20.0e-6;
     signal c            : real := timestep/0.68e-6;
     signal dc_link_gain : real := timestep/320.0e-6;
     signal pri_l_gain   : real := timestep/500.0e-6;
@@ -86,20 +86,28 @@ architecture vunit_simulation of rtl_model_tube_power_tb is
         variable sum_addr      : integer_vector (0 to 5) := (0,1,2,3,4,5);
         variable mult_add_addr : integer_vector (0 to 3) := (7,8,9,10);
         variable mult_addr     : integer_vector (0 to 9) := (11,12,13,14,15,16,17,18,19,20);
+        variable self_lc1_voltage_addr : natural := 0;
+        -- pfc(l1 , c1 , l2 , c2 , lr1 , lr2, dc_link
+        type pfc_model_record is record
+            l1, c1, l2, c2, dc_link : integer;
+        end record;
 
         constant program : program_array :=(
-        /* pipelined_block( */
-        /*     program_array'( */
-        /*         write_instruction(sub     , sum_addr(0)      , input_voltage_addr    , self_lc1_voltage_addr)   , */
-        /*         write_instruction(mpy_add , mult_add_addr(0) , dc_link_addr          , duty_addr                , self_lc2_voltage_addr) , */
-        /*         write_instruction(mpy_add , mult_add_addr(1) , self_i3_addr          , duty_addr                , load_current_addr)     , */
-        /*         write_instruction(sub     , sum_addr(1)      , self_lc1_current_addr , self_lc2_current_addr)   , */
-        /*         write_instruction(sub     , sum_addr(3)      , self_lc2_current_addr , self_i3_addr)            , */
-        /*         write_instruction(sub     , sum_addr(2)      , self_lc1_voltage_addr , self_lc2_voltage_addr)   , */
-        /*         write_instruction(mult    , mult_addr(0)     , r_l_addr              , self_lc1_current_addr)   , */
-        /*         write_instruction(mult    , mult_addr(1)     , r_load                , self_lc2_current_addr)   , */
+        pipelined_block(
+            program_array'(
+                write_instruction(sub        , sum_addr(0)      , input_voltage_addr    , pfc_address)                ,
+                write_instruction(sub        , sum_addr(0)      , input_voltage_addr    , pfc_address)                
+                /* write_instruction(mult_add   , mult_add_addr(0) , dc_link    , pfc_address) */
+        /*         write_instruction(mpy_add , mult_add_addr(0) , dc_link_addr          , duty_addr                   , self_lc2_voltage_addr) , */
+        /*         write_instruction(mpy_add , mult_add_addr(1) , self_i3_addr          , duty_addr                   , load_current_addr)     , */
+        /*         write_instruction(sub     , sum_addr(1)      , self_lc1_current_addr , self_lc2_current_addr)      , */
+        /*         write_instruction(sub     , sum_addr(3)      , self_lc2_current_addr , self_i3_addr)               , */
+        /*         write_instruction(sub     , sum_addr(2)      , self_lc1_voltage_addr , self_lc2_voltage_addr)      , */
+        /*         write_instruction(mult    , mult_addr(0)     , r_l_addr              , self_lc1_current_addr)      , */
+        /*         write_instruction(mult    , mult_addr(1)     , r_load                , self_lc2_current_addr)      , */
         /*         write_instruction(mult    , mult_addr(2)     , r_l                   , self_lc2_current_addr) ) */
-        /* )& */
+        )
+        )&
         /* pipelined_block( */
         /*     write_instruction(mult , mult_addr(6) , sum_addr(0)      , l_gain_addr)       , */
         /*     write_instruction(mult , mult_addr(8) , mult_add_addr(0) , pri_l_gain_addr)   , */
@@ -183,15 +191,15 @@ begin
             mult(2)     := -r_l*self.lc2.current;
 
             -- block2 
-            mult(6)     := sum(0)*l_gain;
-            mult(8)     := mult_add(0)*pri_l_gain;
-            mult(9)     := mult_add(1)*dc_link_gain;
-            mult(4)     := sum(1)*c_gain;
-            mult(5)     := sum(3)*c_gain;
-            mult(3)     := r_load * self.i3;
-            mult(7)     := sum(2) * l_gain;
-            sum(4)      := mult(0) + mult(1);
-            sum(5)      := mult(2) + mult(3);
+            mult(6) := sum(0)*l_gain;
+            mult(8) := mult_add(0)*pri_l_gain;
+            mult(9) := mult_add(1)*dc_link_gain;
+            mult(4) := sum(1)*c_gain;
+            mult(5) := sum(3)*c_gain;
+            mult(3) := r_load * self.i3;
+            mult(7) := sum(2) * l_gain;
+            sum(4)  := mult(0) + mult(1);
+            sum(5)  := mult(2) + mult(3);
 
             -- block3 
             mult_add(2) := sum(4) * l_gain + mult(6);
@@ -223,7 +231,7 @@ begin
                     k_pfc(3) := calculate_pfc(pfc + k_pfc(2)/2.0 , l , c , dc_link_gain , pri_l_gain , r , 0.0 , uin , pfc.dc_link/load_r , duty);
                     k_pfc(4) := calculate_pfc(pfc + k_pfc(3)     , l , c , dc_link_gain , pri_l_gain , r , 0.0 , uin , pfc.dc_link/load_r , duty);
 
-                     pfc <= pfc + (k_pfc(1) + k_pfc(2)/0.5 + k_pfc(3)/0.5 + k_pfc(4))/6.0;
+                    pfc <= pfc + (k_pfc(1) + k_pfc(2)/0.5 + k_pfc(3)/0.5 + k_pfc(4))/6.0;
                     /* pfc <= pfc + k_pfc(2); */
 
                     realtime <= realtime + timestep;
