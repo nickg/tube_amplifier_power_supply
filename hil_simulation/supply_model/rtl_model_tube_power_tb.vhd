@@ -119,16 +119,15 @@ architecture vunit_simulation of rtl_model_tube_power_tb is
         ))&
         pipelined_block(
             program_array'(
-                write_instruction(mpy     , mult_addr(6) , sum_addr(0)      , pfc.l3)       ,
-                write_instruction(mpy     , mult_addr(6) , sum_addr(0)      , pfc.l3)       
-        /*     write_instruction(mult , mult_addr(8) , mult_add_addr(0) , pri_l_gain_addr)   , */
-        /*     write_instruction(mult , mult_addr(9) , mult_add_addr(1) , dc_link_gain_addr) , */
-        /*     write_instruction(mult , mult_addr(4) , sum_addr(1)      , c_gain_addr)       , */
-        /*     write_instruction(mult , mult_addr(5) , sum_addr(3)      , c_gain_addr)       , */
-        /*     write_instruction(mult , mult_addr(3) , r_load_addr(3)   , self_i3_addr)      , */
-        /*     write_instruction(mult , mult_addr(7) , sum_addr(2)      , l_gain_addr)       , */
-        /*     write_instruction(add  , add_addr(4)  , mult_addr(0)     , mult_addr(1))      , */
-        /*     write_instruction(add  , add_addr(5)  , mult_addr(2)     , mult_addr(3)) */
+                write_instruction(mpy  , mult_addr(6) , sum_addr(0)      , pfc.l3)           ,
+                write_instruction(mpy  , mult_addr(8) , mult_add_addr(0) , pfc.l3)           ,
+                write_instruction(mpy , mult_addr(9) , mult_add_addr(1) , pfc.dc_link) 
+        /*     write_instruction(mult  , mult_addr(4) , sum_addr(1)      , c_gain_addr)      , */
+        /*     write_instruction(mult  , mult_addr(5) , sum_addr(3)      , c_gain_addr)      , */
+        /*     write_instruction(mult  , mult_addr(3) , r_load_addr(3)   , self_i3_addr)     , */
+        /*     write_instruction(mult  , mult_addr(7) , sum_addr(2)      , l_gain_addr)      , */
+        /*     write_instruction(add   , add_addr(4)  , mult_addr(0)     , mult_addr(1))     , */
+        /*     write_instruction(add   , add_addr(5)  , mult_addr(2)     , mult_addr(3)) */
         ))&
         pipelined_block(
             program_array'(
