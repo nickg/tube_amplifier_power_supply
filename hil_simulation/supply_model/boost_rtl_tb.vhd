@@ -56,23 +56,18 @@ architecture vunit_simulation of boost_rtl_tb is
     constant variables : variable_array := init_variables(21) + 33;
 
     alias input_voltage_addr is variables(0);
-    alias voltage_addr       is variables(1);
+    alias udc                is variables(1);
     alias current_addr       is variables(2);
     alias c_addr             is variables(3);
     alias l_addr             is variables(4);
     alias r_addr             is variables(5);
 
     alias d_x_udc_m_uin    is variables(6);
-    alias uL               is variables(10);
-    alias duty             is variables(11);
-    alias inductor_current is current_addr;
-    alias l_gain           is l_addr;
-    alias c_gain           is c_addr;
-    alias ic               is variables(16);
-    alias udc              is voltage_addr;
-    alias rl               is variables(5);
-    alias iload            is variables(19);
-    alias duty2            is variables(20);
+    alias uL               is variables(7);
+    alias duty             is variables(8);
+    alias ic               is variables(9);
+    alias iload            is variables(10);
+    alias duty2            is variables(11);
 
     constant boost_program : program_array :=(
         pipelined_block(
@@ -80,20 +75,20 @@ architecture vunit_simulation of boost_rtl_tb is
             write_instruction(mpy_add , d_x_udc_m_uin , 
                 duty , udc , input_voltage_addr),
             write_instruction(mpy_add , ic ,
-                duty2 , inductor_current, iload)
+                duty2 , current_addr, iload)
             )
         ) &
         pipelined_block(
             program_array'(
             write_instruction(mpy_add , uL , 
-                inductor_current , rl, d_x_udc_m_uin),
+                current_addr , r_addr, d_x_udc_m_uin),
             write_instruction(mpy_add , udc ,
-                ic , c_gain, udc)
+                ic , c_addr, udc)
             )
         ) &
         pipelined_block(
-            write_instruction(mpy_add , inductor_current , 
-                uL , l_gain, inductor_current)
+            write_instruction(mpy_add , current_addr , 
+                uL , l_addr, current_addr)
         ) &
         write_instruction(program_end));
 
@@ -107,7 +102,7 @@ architecture vunit_simulation of boost_rtl_tb is
             retval(i + 128) := boost_program(i);
         end loop;
         retval(input_voltage_addr ) := to_std_logic_vector(to_float(100.0  )  ) ;
-        retval(voltage_addr       ) := to_std_logic_vector(to_float(100.0  )  ) ;
+        retval(udc                ) := to_std_logic_vector(to_float(100.0  )  ) ;
         retval(current_addr       ) := to_std_logic_vector(to_float(0.0  )  ) ;
         retval(c_addr             ) := to_std_logic_vector(to_float(c    )  ) ;
         retval(l_addr             ) := to_std_logic_vector(to_float(l    )  ) ;
@@ -211,7 +206,7 @@ begin
              ram_read_3_data_out      ,
              ram_write_port          );
 
-             if ram_write_port.write_requested = '1' and ram_write_port.address = voltage_addr then
+             if ram_write_port.write_requested = '1' and ram_write_port.address = udc then
                  result3 <= to_real(to_float(ram_write_port.data));
              end if;
 
