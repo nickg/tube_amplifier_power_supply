@@ -60,6 +60,8 @@ mcu.add_source_files(ROOT / "hil_simulation/supply_model/supply_model_tb.vhd")
 mcu.add_source_files(ROOT / "hil_simulation/supply_model/rtl_model_tube_power_tb.vhd")
 mcu.add_source_files(ROOT / "hil_simulation/supply_model/boost_rtl_tb.vhd")
 
+mcu.add_source_files(ROOT / "hil_simulation/supply_model/tb_for_testing_model.vhd")
+
 dhb = VU.add_library("dhb")
 dhb.add_source_files(ROOT / "source/top/system_control/component_interconnect/power_supply_control/dhb_control/phase_modulator/phase_modulator_pkg.vhd")
 dhb.add_source_files(ROOT / "source/top/system_control/component_interconnect/power_supply_control/dhb_control/phase_modulator/deadtime_pkg.vhd")

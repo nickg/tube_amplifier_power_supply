@@ -52,51 +52,74 @@ architecture vunit_simulation of boost_rtl_tb is
     constant c : real := timestep/50.0e-6;
     signal sequencer : natural := 0;
 
-    constant input_voltage_addr : natural := 0;
-    constant voltage_addr       : natural := 1;
-    constant current_addr       : natural := 2;
-    constant c_addr             : natural := 3;
-    constant l_addr             : natural := 4;
-    constant r_addr             : natural := 5;
-    constant i1_x_ra_plus_uc    : natural := 6;
-    constant mac2_addr          : natural := voltage_addr;
-    constant sub1_addr          : natural := 7;
+    constant variables : variable_array := init_variables(21) + 33;
 
-    constant uin_minus_uc1          : natural := 8;
+    alias input_voltage_addr is variables(0);
+    alias voltage_addr       is variables(1);
+    alias current_addr       is variables(2);
+    alias c_addr             is variables(3);
+    alias l_addr             is variables(4);
+    alias r_addr             is variables(5);
+    alias i1_x_ra_plus_uc    is variables(6);
+    alias sub1_addr          is variables(7);
+    alias uin_minus_uc1      is variables(8);
+
+    alias d_x_udc_m_uin    is variables(9);
+    alias uL               is variables(10);
+    alias duty             is variables(11);
+    alias vin              is input_voltage_addr;
+    alias inductor_current is current_addr;
+    alias l_gain           is l_addr;
+    alias c_gain           is c_addr;
+    alias ic               is variables(16);
+    alias udc              is voltage_addr;
+    alias rl               is r_addr;
+    alias iload            is variables(19);
+    alias duty2            is variables(20);
+
+    constant boost_program : program_array :=(
+        pipelined_block(
+            write_instruction(mpy_add , d_x_udc_m_uin , 
+                duty , udc , vin)
+        ) &
+        pipelined_block(
+            write_instruction(mpy_add , uL , 
+                inductor_current , rl, d_x_udc_m_uin)
+        ) &
+        pipelined_block(
+            write_instruction(mpy_add , inductor_current , 
+                uL , l_gain, inductor_current)
+        ) &
+        pipelined_block(
+            write_instruction(mpy_add , ic ,
+                duty2 , inductor_current, iload)
+        ) &
+        pipelined_block(
+            write_instruction(mpy_add , udc ,
+                ic , c_gain, udc)
+        ) &
+        write_instruction(program_end));
 
     function build_lcr_sw (filter_gain : real range 0.0 to 1.0; u_address, y_address, g_address, temp_address : natural) return ram_array
     is
 
-        constant program : program_array :=(
-            pipelined_block(
-                program_array'(
-                write_instruction(sub     , uin_minus_uc1   , current_addr , r_addr , voltage_addr) ,
-                write_instruction(mpy_add , i1_x_ra_plus_uc , current_addr , r_addr , voltage_addr) ,
-                write_instruction(mpy_add , voltage_addr    , current_addr , c_addr , voltage_addr)
-                )
-            ) &
-            pipelined_block(
-                write_instruction(sub , sub1_addr , input_voltage_addr , i1_x_ra_plus_uc)
-            ) &
-            pipelined_block(
-                write_instruction(mpy_add , current_addr , sub1_addr , l_addr , current_addr)
-            ) &
-            write_instruction(program_end));
         ------------------------------
         variable retval : ram_array := (others => (others => '0'));
     begin
-        for i in program'range loop
-            retval(i + 128) := program(i);
+        for i in boost_program'range loop
+            retval(i + 128) := boost_program(i);
         end loop;
-        retval(input_voltage_addr) := to_std_logic_vector(to_float(1.0));
-        retval(voltage_addr      ) := to_std_logic_vector(to_float(0.0));
-        retval(current_addr      ) := to_std_logic_vector(to_float(0.0));
-        retval(c_addr            ) := to_std_logic_vector(to_float(c));
-        retval(l_addr            ) := to_std_logic_vector(to_float(l));
-        retval(r_addr            ) := to_std_logic_vector(to_float(r));
-        retval(i1_x_ra_plus_uc   ) := to_std_logic_vector(to_float(0.0));
-        retval(mac2_addr         ) := to_std_logic_vector(to_float(0.0));
-        retval(sub1_addr         ) := to_std_logic_vector(to_float(0.0));
+        retval(input_voltage_addr ) := to_std_logic_vector(to_float(1.0  )  ) ;
+        retval(voltage_addr       ) := to_std_logic_vector(to_float(1.1  )  ) ;
+        retval(current_addr       ) := to_std_logic_vector(to_float(0.0  )  ) ;
+        retval(c_addr             ) := to_std_logic_vector(to_float(c    )  ) ;
+        retval(l_addr             ) := to_std_logic_vector(to_float(l    )  ) ;
+        retval(r_addr             ) := to_std_logic_vector(to_float(-0.2    )  ) ;
+        retval(i1_x_ra_plus_uc    ) := to_std_logic_vector(to_float(0.0  )  ) ;
+        retval(sub1_addr          ) := to_std_logic_vector(to_float(0.0  )  ) ;
+        retval(duty               ) := to_std_logic_vector(to_float(-0.5 )  ) ;
+        retval(duty2              ) := to_std_logic_vector(to_float(0.5 )  ) ;
+        retval(iload              ) := to_std_logic_vector(to_float(0.0  )  ) ;
 
         return retval;
     end build_lcr_sw;
@@ -133,13 +156,15 @@ architecture vunit_simulation of boost_rtl_tb is
 
     signal ready_pipeline : std_logic_vector(2 downto 0) := (others => '0');
 
+    signal sequence_counter : natural := 0;
+
 begin
 
 ------------------------------------------------------------------------
     simtime : process
     begin
         test_runner_setup(runner, runner_cfg);
-        wait until realtime > 2.0e-3;
+        wait until realtime > 4.0e-3;
         /* check(abs(result3-voltage) < 0.01); */
         test_runner_cleanup(runner); -- Simulation ends here
         wait;
@@ -167,7 +192,7 @@ begin
 
             CASE sequencer is
                 WHEN 0 => 
-                    dil1 := ((uin - uc1)      - (rl1+rc1)*il1 + rc2*il2)*L1;
+                    /* dil1 := ((uin - uc1)      - (rl1+rc1)*il1 + rc2*il2)*L1; */
                     /* dil2 := ((uc1 - uc2)      + rc1*il1 - (rc2 + rl2 + rc3)*i2 + rc3*i3)*L2; */
                     /* dil3 := ((uc2 - duty*udc) + rc2*il2 - (rc3 + rl3 + rbridge)*i3)*L3; */
                     /* il1  := il1 + di11; */
@@ -237,9 +262,17 @@ begin
 
             if ready_pipeline(ready_pipeline'left) = '1' then
                 sequencer <= 0;
-                request_processor(self, 128);
                 realtime <= realtime + timestep;
                 write_to(file_handler,(realtime, result3, result2, voltage, current));
+                request_processor(self, 128);
+                CASE sequence_counter is
+                    WHEN 0 =>
+                        if realtime > 2.0e-3 then
+                            write_data_to_ram(ram_write_port, input_voltage_addr, to_std_logic_vector(to_float(1.5)));
+                            sequence_counter <= sequence_counter + 1;
+                        end if;
+                    WHEN others => --do nothing
+                end CASE;
             end if;
 
 
