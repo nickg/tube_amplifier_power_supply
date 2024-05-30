@@ -36,21 +36,21 @@ architecture vunit_simulation of boost_rtl_tb is
     ------------------------------------------------------------------------
 
 ------------------------------------------------------------------------
-    signal realtime : real := 0.0;
+    signal realtime   : real := 0.0;
     constant timestep : real := 4.0e-6;
     constant stoptime : real := 10.0e-3;
 
-    signal uin : real := 0.0;
-    signal uc1 : real := 0.0;
+    signal uin   : real := 0.0;
+    signal uc1   : real := 0.0;
     constant rl1 : real := 0.1;
     constant rc1 : real := 0.015;
 
-    signal current : real := 0.0;
-    signal voltage : real := 0.0;
+    signal current       : real := 0.0;
+    signal voltage       : real := 0.0;
     signal input_voltage : real := 1.0;
-    constant r : real := 0.56;
-    constant l : real := timestep/50.0e-6;
-    constant c : real := timestep/50.0e-6;
+    constant r           : real := 0.56;
+    constant l           : real := timestep/50.0e-6;
+    constant c           : real := timestep/50.0e-6;
     signal sequencer : natural := 0;
 
     constant variables : variable_array := init_variables(21) + 33;
@@ -61,20 +61,16 @@ architecture vunit_simulation of boost_rtl_tb is
     alias c_addr             is variables(3);
     alias l_addr             is variables(4);
     alias r_addr             is variables(5);
-    alias i1_x_ra_plus_uc    is variables(6);
-    alias sub1_addr          is variables(7);
-    alias uin_minus_uc1      is variables(8);
 
-    alias d_x_udc_m_uin    is variables(9);
+    alias d_x_udc_m_uin    is variables(6);
     alias uL               is variables(10);
     alias duty             is variables(11);
-    alias vin              is input_voltage_addr;
     alias inductor_current is current_addr;
     alias l_gain           is l_addr;
     alias c_gain           is c_addr;
     alias ic               is variables(16);
     alias udc              is voltage_addr;
-    alias rl               is r_addr;
+    alias rl               is variables(5);
     alias iload            is variables(19);
     alias duty2            is variables(20);
 
@@ -82,7 +78,7 @@ architecture vunit_simulation of boost_rtl_tb is
         pipelined_block(
             program_array'(
             write_instruction(mpy_add , d_x_udc_m_uin , 
-                duty , udc , vin),
+                duty , udc , input_voltage_addr),
             write_instruction(mpy_add , ic ,
                 duty2 , inductor_current, iload)
             )
@@ -116,8 +112,6 @@ architecture vunit_simulation of boost_rtl_tb is
         retval(c_addr             ) := to_std_logic_vector(to_float(c    )  ) ;
         retval(l_addr             ) := to_std_logic_vector(to_float(l    )  ) ;
         retval(r_addr             ) := to_std_logic_vector(to_float(-0.24    )  ) ;
-        retval(i1_x_ra_plus_uc    ) := to_std_logic_vector(to_float(0.0  )  ) ;
-        retval(sub1_addr          ) := to_std_logic_vector(to_float(0.0  )  ) ;
         retval(duty               ) := to_std_logic_vector(to_float(-0.5 )  ) ;
         retval(duty2              ) := to_std_logic_vector(to_float(0.5 )  ) ;
         retval(iload              ) := to_std_logic_vector(to_float(0.0  )  ) ;
@@ -166,7 +160,6 @@ begin
     begin
         test_runner_setup(runner, runner_cfg);
         wait until realtime > stoptime;
-        /* check(abs(result3-voltage) < 0.01); */
         test_runner_cleanup(runner); -- Simulation ends here
         wait;
     end process simtime;	
