@@ -37,7 +37,8 @@ architecture vunit_simulation of boost_rtl_tb is
 
 ------------------------------------------------------------------------
     signal realtime : real := 0.0;
-    signal timestep : real := 1.7e-6;
+    constant timestep : real := 4.0e-6;
+    constant stoptime : real := 6.0e-3;
 
     signal uin : real := 0.0;
     signal uc1 : real := 0.0;
@@ -117,9 +118,9 @@ architecture vunit_simulation of boost_rtl_tb is
         retval(r_addr             ) := to_std_logic_vector(to_float(-0.2    )  ) ;
         retval(i1_x_ra_plus_uc    ) := to_std_logic_vector(to_float(0.0  )  ) ;
         retval(sub1_addr          ) := to_std_logic_vector(to_float(0.0  )  ) ;
-        retval(duty               ) := to_std_logic_vector(to_float(-0.5 )  ) ;
-        retval(duty2              ) := to_std_logic_vector(to_float(0.5 )  ) ;
-        retval(iload              ) := to_std_logic_vector(to_float(0.0  )  ) ;
+        retval(duty               ) := to_std_logic_vector(to_float(-0.6 )  ) ;
+        retval(duty2              ) := to_std_logic_vector(to_float(0.6 )  ) ;
+        retval(iload              ) := to_std_logic_vector(to_float(-1.0  )  ) ;
 
         return retval;
     end build_lcr_sw;
@@ -164,7 +165,7 @@ begin
     simtime : process
     begin
         test_runner_setup(runner, runner_cfg);
-        wait until realtime > 4.0e-3;
+        wait until realtime > stoptime;
         /* check(abs(result3-voltage) < 0.01); */
         test_runner_cleanup(runner); -- Simulation ends here
         wait;
@@ -269,6 +270,11 @@ begin
                     WHEN 0 =>
                         if realtime > 2.0e-3 then
                             write_data_to_ram(ram_write_port, input_voltage_addr, to_std_logic_vector(to_float(1.5)));
+                            sequence_counter <= sequence_counter + 1;
+                        end if;
+                    WHEN 1 =>
+                        if realtime > 4.0e-3 then
+                            write_data_to_ram(ram_write_port, iload, to_std_logic_vector(to_float(-1.5)));
                             sequence_counter <= sequence_counter + 1;
                         end if;
                     WHEN others => --do nothing
