@@ -80,24 +80,24 @@ architecture vunit_simulation of boost_rtl_tb is
 
     constant boost_program : program_array :=(
         pipelined_block(
+            program_array'(
             write_instruction(mpy_add , d_x_udc_m_uin , 
-                duty , udc , vin)
+                duty , udc , vin),
+            write_instruction(mpy_add , ic ,
+                duty2 , inductor_current, iload)
+            )
         ) &
         pipelined_block(
+            program_array'(
             write_instruction(mpy_add , uL , 
-                inductor_current , rl, d_x_udc_m_uin)
+                inductor_current , rl, d_x_udc_m_uin),
+            write_instruction(mpy_add , udc ,
+                ic , c_gain, udc)
+            )
         ) &
         pipelined_block(
             write_instruction(mpy_add , inductor_current , 
                 uL , l_gain, inductor_current)
-        ) &
-        pipelined_block(
-            write_instruction(mpy_add , ic ,
-                duty2 , inductor_current, iload)
-        ) &
-        pipelined_block(
-            write_instruction(mpy_add , udc ,
-                ic , c_gain, udc)
         ) &
         write_instruction(program_end));
 
