@@ -43,6 +43,11 @@ set(boost_open_loop_sources
     qspice_ref_models/boost_simulation/boost_open_loop.cpp
 )
 
+set(rtl_boost_ref_open_loop_sources
+    ${modulator_sources}
+    qspice_ref_models/boost_simulation/rtl_boost_reference.cpp
+)
+
 set(boost_closed_loop_sources
     ${modulator_sources}
     cpp_sources/feedback_control/current_control.hpp
@@ -86,6 +91,7 @@ set(guitar_power_supply_sources
 
 # Create shared libraries and specify destination folders
 create_shared_library(dpwm "${dpwm_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models)
+create_shared_library(rtl_boost_reference "${rtl_boost_ref_open_loop_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models/boost_simulation)
 create_shared_library(boost_open_loop "${boost_open_loop_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models/boost_simulation)
 create_shared_library(boost_closed_loop "${boost_closed_loop_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models/boost_simulation)
 create_shared_library(boost_voltage_closed_loop "${boost_voltage_closed_loop_sources}" ${CMAKE_SOURCE_DIR}/qspice_ref_models/boost_simulation)
