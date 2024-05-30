@@ -38,7 +38,7 @@ architecture vunit_simulation of boost_rtl_tb is
 ------------------------------------------------------------------------
     signal realtime : real := 0.0;
     constant timestep : real := 4.0e-6;
-    constant stoptime : real := 6.0e-3;
+    constant stoptime : real := 10.0e-3;
 
     signal uin : real := 0.0;
     signal uc1 : real := 0.0;
@@ -115,7 +115,7 @@ architecture vunit_simulation of boost_rtl_tb is
         retval(current_addr       ) := to_std_logic_vector(to_float(0.0  )  ) ;
         retval(c_addr             ) := to_std_logic_vector(to_float(c    )  ) ;
         retval(l_addr             ) := to_std_logic_vector(to_float(l    )  ) ;
-        retval(r_addr             ) := to_std_logic_vector(to_float(-0.25    )  ) ;
+        retval(r_addr             ) := to_std_logic_vector(to_float(-0.24    )  ) ;
         retval(i1_x_ra_plus_uc    ) := to_std_logic_vector(to_float(0.0  )  ) ;
         retval(sub1_addr          ) := to_std_logic_vector(to_float(0.0  )  ) ;
         retval(duty               ) := to_std_logic_vector(to_float(-0.5 )  ) ;
@@ -191,24 +191,6 @@ begin
                 init_simfile(file_handler, ("time", "volt", "curr", "vref", "iref"));
             end if;
 
-            CASE sequencer is
-                WHEN 0 => 
-                    /* dil1 := ((uin - uc1)      - (rl1+rc1)*il1 + rc2*il2)*L1; */
-                    /* dil2 := ((uc1 - uc2)      + rc1*il1 - (rc2 + rl2 + rc3)*i2 + rc3*i3)*L2; */
-                    /* dil3 := ((uc2 - duty*udc) + rc2*il2 - (rc3 + rl3 + rbridge)*i3)*L3; */
-                    /* il1  := il1 + di11; */
-                    /* il2  := il2 + di12; */
-                    /* il3  := il3 + di13; */
-                    /* uc1  := uc1 + (il1 - il2) * c1; */
-                    /* uc2  := uc2 + (il2 - il3) * c2; */
-                    /* udc  := udc + (il3*duty - iload) * cdc; */
-
-                    /* current   <= mac3; */
-                    /* voltage   <= mac2; */
-                    sequencer <= sequencer + 1;
-                WHEN others => -- do nothing
-            end CASE;
-
             --------------------
             create_simple_processor (
                 self                     ,
@@ -269,12 +251,20 @@ begin
                 CASE sequence_counter is
                     WHEN 0 =>
                         if realtime > 2.0e-3 then
-                            /* write_data_to_ram(ram_write_port, input_voltage_addr, to_std_logic_vector(to_float(1.5))); */
+                            write_data_to_ram(ram_write_port, duty, to_std_logic_vector(to_float(-0.25)));
                             sequence_counter <= sequence_counter + 1;
                         end if;
                     WHEN 1 =>
+                            write_data_to_ram(ram_write_port, duty2, to_std_logic_vector(to_float(0.25)));
+                            sequence_counter <= sequence_counter + 1;
+                    WHEN 2 =>
                         if realtime > 4.0e-3 then
-                            /* write_data_to_ram(ram_write_port, iload, to_std_logic_vector(to_float(-1.5))); */
+                            write_data_to_ram(ram_write_port, input_voltage_addr, to_std_logic_vector(to_float(120.0)));
+                            sequence_counter <= sequence_counter + 1;
+                        end if;
+                    WHEN 3 =>
+                        if realtime > 6.0e-3 then
+                            write_data_to_ram(ram_write_port, iload, to_std_logic_vector(to_float(-10.0)));
                             sequence_counter <= sequence_counter + 1;
                         end if;
                     WHEN others => --do nothing
