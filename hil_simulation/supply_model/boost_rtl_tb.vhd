@@ -40,18 +40,11 @@ architecture vunit_simulation of boost_rtl_tb is
     constant timestep : real := 4.0e-6;
     constant stoptime : real := 10.0e-3;
 
-    signal uin   : real := 0.0;
-    signal uc1   : real := 0.0;
-    constant rl1 : real := 0.1;
-    constant rc1 : real := 0.015;
-
     signal current       : real := 0.0;
     signal voltage       : real := 0.0;
     signal input_voltage : real := 1.0;
-    constant r           : real := 0.56;
     constant l           : real := timestep/50.0e-6;
     constant c           : real := timestep/50.0e-6;
-    signal sequencer : natural := 0;
 
     constant variables : variable_array := init_variables(21) + 33;
 
@@ -165,13 +158,6 @@ begin
     stimulus : process(simulator_clock)
         variable used_instruction : t_instruction;
         file file_handler : text open write_mode is "boost_rtl_tb.dat";
-        variable dil1, dil2, dil3 : real; 
-        constant uin : real := 1.0;
-        variable il1 : real := 0.0;
-        variable il2 : real := 0.0;
-        variable il3 : real := 0.0;
-        constant rc2 : real := 0.15;
-        constant L1 : real := timestep/10.0e-6;
     begin
         if rising_edge(simulator_clock) then
             simulation_counter <= simulation_counter + 1;
@@ -214,13 +200,9 @@ begin
                  result2 <= to_real(to_float(ram_write_port.data));
              end if;
 
-        ------------------------------------------------------------------------
-        ------------------------------------------------------------------------
             ------------------------------------------------------------------------
-            -- test signals
             ------------------------------------------------------------------------
             if simulation_counter = 0 then
-                sequencer <= 0;
                 request_processor(self, 128);
                 realtime <= realtime + timestep;
                 write_to(file_handler,(realtime, result3, result2, voltage, current));
@@ -232,7 +214,6 @@ begin
             end if;
 
             if ready_pipeline(ready_pipeline'left) = '1' then
-                sequencer <= 0;
                 realtime <= realtime + timestep;
                 write_to(file_handler,(realtime, result3, result2, voltage, current));
                 request_processor(self, 128);
