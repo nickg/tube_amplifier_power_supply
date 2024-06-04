@@ -58,21 +58,16 @@ extern "C" __declspec(dllexport) void rtl_boost_reference(void **opaque, double 
     PWM_lo  = modulator.getPWMLo();
 
     // model excitement
-    if (t > 6.0e-3)
-    {
-        iload = -10.0;
-    } else {
-        iload = 0;
-    }
+    iload = 0;
+    if (t > 6.0e-3) {
+        iload = -10.0; }
 
+    vin = 100.0;
     if (t > 4.0e-3)
         vin = 120.0;
-    else
-        vin = 100.0;
 
+    modulator.set_duty(0.5);
     if (t > 2e-3)
         modulator.set_duty(0.25);
-    else
-        modulator.set_duty(0.5);
 
 }
