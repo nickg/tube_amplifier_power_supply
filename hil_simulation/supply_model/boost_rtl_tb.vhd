@@ -60,15 +60,14 @@ architecture vunit_simulation of boost_rtl_tb is
     alias duty             is variables(8);
     alias ic               is variables(9);
     alias iload            is variables(10);
-    alias duty2            is variables(11);
 
     constant boost_program : program_array :=(
         pipelined_block(
             program_array'(
-            write_instruction(mpy_add , d_x_udc_m_uin , 
+            write_instruction(neg_mpy_add , d_x_udc_m_uin , 
                 duty , udc , input_voltage_addr),
             write_instruction(mpy_add , ic ,
-                duty2 , current_addr, iload)
+                duty , current_addr, iload)
             )
         ) &
         pipelined_block(
@@ -100,8 +99,7 @@ architecture vunit_simulation of boost_rtl_tb is
         retval(c_addr             ) := to_std_logic_vector(to_float(c    )  ) ;
         retval(l_addr             ) := to_std_logic_vector(to_float(l    )  ) ;
         retval(r_addr             ) := to_std_logic_vector(to_float(-0.24    )  ) ;
-        retval(duty               ) := to_std_logic_vector(to_float(-0.5 )  ) ;
-        retval(duty2              ) := to_std_logic_vector(to_float(0.5 )  ) ;
+        retval(duty               ) := to_std_logic_vector(to_float(0.5 )  ) ;
         retval(iload              ) := to_std_logic_vector(to_float(0.0  )  ) ;
 
         return retval;
@@ -220,18 +218,15 @@ begin
                 CASE sequence_counter is
                     WHEN 0 =>
                         if realtime > 2.0e-3 then
-                            write_data_to_ram(ram_write_port, duty, to_std_logic_vector(to_float(-0.25)));
+                            write_data_to_ram(ram_write_port, duty, to_std_logic_vector(to_float(0.25)));
                             sequence_counter <= sequence_counter + 1;
                         end if;
                     WHEN 1 =>
-                            write_data_to_ram(ram_write_port, duty2, to_std_logic_vector(to_float(0.25)));
-                            sequence_counter <= sequence_counter + 1;
-                    WHEN 2 =>
                         if realtime > 4.0e-3 then
                             write_data_to_ram(ram_write_port, input_voltage_addr, to_std_logic_vector(to_float(120.0)));
                             sequence_counter <= sequence_counter + 1;
                         end if;
-                    WHEN 3 =>
+                    WHEN 2 =>
                         if realtime > 6.0e-3 then
                             write_data_to_ram(ram_write_port, iload, to_std_logic_vector(to_float(-10.0)));
                             sequence_counter <= sequence_counter + 1;
