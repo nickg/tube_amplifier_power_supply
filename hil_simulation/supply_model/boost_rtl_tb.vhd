@@ -8,12 +8,13 @@ LIBRARY ieee  ;
     use work.float_type_definitions_pkg.all;
     use work.float_to_real_conversions_pkg.all;
 
-package boost_model_pkg is
-    constant inductance  : real := 50.0e-6;
-    constant capacitance : real := 50.0e-6;
-    constant rl          : real := 0.24;
-    constant timestep    : real := 4.0e-6;
-    constant boost_addr_offset : natural := 33;
+package boost_model_generic_pkg is
+    generic (
+	constant inductance  : real;
+	constant capacitance : real;
+	constant rl          : real;
+	constant timestep    : real;
+	constant boost_addr_offset : natural );
 
     constant l : real := timestep/inductance;
     constant c : real := timestep/capacitance;
@@ -69,9 +70,9 @@ package boost_model_pkg is
         ) &
         write_instruction(program_end));
 
-end package boost_model_pkg;
+end package boost_model_generic_pkg;
 
-package body boost_model_pkg is
+package body boost_model_generic_pkg is
 
     function calculate_boost
     (
@@ -91,7 +92,18 @@ package body boost_model_pkg is
         
     end calculate_boost;
 
-end package body boost_model_pkg;
+end package body boost_model_generic_pkg;
+
+-------------------------------------------------------------------------------
+
+-- package boost_model_pkg is
+--     new work.boost_model_generic_pkg
+-- 	generic map (
+-- 	    inductance  => 50.0e-6,
+-- 	    capacitance => 50.0e-6,
+-- 	    rl          => 0.24,
+-- 	    timestep    => 4.0e-6,
+-- 	    boost_addr_offset => 33 );
 
 ------------------------------------------------------------------------
 
@@ -125,7 +137,7 @@ context vunit_lib.vunit_context;
     use work.float_assembler_pkg.all;
     use work.microinstruction_pkg.all;
 
-    use work.boost_model_pkg.all;
+   -- use work.boost_model_pkg.all;
 
 entity boost_rtl_tb is
   generic (runner_cfg : string);
@@ -133,6 +145,16 @@ end;
 
 architecture vunit_simulation of boost_rtl_tb is
 
+package boost_model_pkg is
+    new work.boost_model_generic_pkg
+	generic map (
+	    inductance  => 50.0e-6,
+	    capacitance => 50.0e-6,
+	    rl          => 0.24,
+	    timestep    => 4.0e-6,
+	    boost_addr_offset => 33 );
+
+    use boost_model_pkg.all;
 
     constant clock_period      : time    := 1 ns;
     
