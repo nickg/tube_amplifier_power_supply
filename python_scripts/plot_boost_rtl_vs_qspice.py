@@ -29,8 +29,10 @@ fig1, (axT, axB) = plt.subplots(2,1,sharex=True,constrained_layout=True)
 
 df.plot(ax=axT, x="Time",  y="V(vdc)", label="QSPICE voltage")
 vhdl_data.plot(ax=axT, x="time", y="volt", label="vhdl voltage")
+vhdl_data.plot(ax=axT, x="time", y="vref", label="vhdl reference voltage")
 df.plot(ax=axB, x="Time",  y="V(sampled_current)", label="QSPICE current")
 vhdl_data.plot(ax=axB, x="time", y="curr", label="vhdl current")
+vhdl_data.plot(ax=axB, x="time", y="iref", label="vhdl reference current")
 
 plt.show()
 plt.close('all')

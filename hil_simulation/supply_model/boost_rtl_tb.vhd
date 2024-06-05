@@ -2,51 +2,36 @@ LIBRARY ieee  ;
     USE ieee.NUMERIC_STD.all  ; 
     USE ieee.std_logic_1164.all  ; 
     use ieee.math_real.all;
-    use std.textio.all;
-
-    use work.write_pkg.all;
-
-library vunit_lib;
-context vunit_lib.vunit_context;
 
     use work.microinstruction_pkg.all;
-    use work.multi_port_ram_pkg.all;
-    use work.simple_processor_pkg.all;
-    use work.processor_configuration_pkg.all;
-    use work.float_alu_pkg.all;
+    use work.processor_configuration_pkg.t_command;
     use work.float_type_definitions_pkg.all;
     use work.float_to_real_conversions_pkg.all;
 
-    use work.memory_processing_pkg.all;
-    use work.float_assembler_pkg.all;
-    use work.microinstruction_pkg.all;
+package boost_model_pkg is
+    constant inductance  : real := 50.0e-6;
+    constant capacitance : real := 50.0e-6;
+    constant rl          : real := 0.24;
+    constant timestep    : real := 4.0e-6;
+    constant boost_addr_offset : natural := 33;
 
-entity boost_rtl_tb is
-  generic (runner_cfg : string);
-end;
+    constant l : real := timestep/inductance;
+    constant c : real := timestep/capacitance;
 
-architecture vunit_simulation of boost_rtl_tb is
+    type boost_model_record is record
+        inductor_current : real;
+        dc_link_voltage : real;
+    end record;
 
-    constant clock_period      : time    := 1 ns;
-    
-    signal simulator_clock     : std_logic := '0';
-    signal simulation_counter  : natural   := 0;
-    -----------------------------------
-    -- simulation specific signals ----
-    ------------------------------------------------------------------------
-
-------------------------------------------------------------------------
-    signal realtime   : real := 0.0;
-    constant timestep : real := 4.0e-6;
-    constant stoptime : real := 10.0e-3;
-
-    signal current       : real := 0.0;
-    signal voltage       : real := 0.0;
-    signal input_voltage : real := 1.0;
-    constant l           : real := timestep/50.0e-6;
-    constant c           : real := timestep/50.0e-6;
-
-    constant variables : variable_array := init_variables(21) + 33;
+    function calculate_boost (
+        self          : boost_model_record;
+        duty          : real;
+        load_current  : real;
+        input_voltage : real
+    )
+    return boost_model_record;
+----------------------------------------------------------------
+    constant variables : variable_array := init_variables(21) + boost_addr_offset;
 
     alias input_voltage_addr is variables(0);
     alias udc                is variables(1);
@@ -72,7 +57,7 @@ architecture vunit_simulation of boost_rtl_tb is
         ) &
         pipelined_block(
             program_array'(
-            write_instruction(mpy_add , uL , 
+            write_instruction(neg_mpy_add , uL , 
                 current_addr , r_addr, d_x_udc_m_uin),
             write_instruction(mpy_add , udc ,
                 ic , c_addr, udc)
@@ -84,29 +69,107 @@ architecture vunit_simulation of boost_rtl_tb is
         ) &
         write_instruction(program_end));
 
-    function build_lcr_sw (filter_gain : real range 0.0 to 1.0; u_address, y_address, g_address, temp_address : natural) return ram_array
-    is
+end package boost_model_pkg;
 
-        ------------------------------
+package body boost_model_pkg is
+
+    function calculate_boost
+    (
+        self          : boost_model_record;
+        duty          : real;
+        load_current  : real;
+        input_voltage : real
+    )
+    return boost_model_record
+    is
+        variable retval : boost_model_record := self;
+    begin
+        retval.inductor_current := retval.inductor_current + (input_voltage - retval.dc_link_voltage*duty - rl * retval.inductor_current)*l;
+        retval.dc_link_voltage := retval.dc_link_voltage + (retval.inductor_current*duty + load_current)*c;
+
+        return retval;
+        
+    end calculate_boost;
+
+end package body boost_model_pkg;
+
+------------------------------------------------------------------------
+
+LIBRARY ieee  ; 
+    USE ieee.NUMERIC_STD.all  ; 
+    USE ieee.std_logic_1164.all  ; 
+    use ieee.math_real.all;
+    use std.textio.all;
+
+LIBRARY ieee  ; 
+    USE ieee.NUMERIC_STD.all  ; 
+    USE ieee.std_logic_1164.all  ; 
+    use ieee.math_real.all;
+    use std.textio.all;
+
+    use work.write_pkg.all;
+
+library vunit_lib;
+context vunit_lib.vunit_context;
+
+    use work.multi_port_ram_pkg.all;
+
+    use work.microinstruction_pkg.all;
+    use work.simple_processor_pkg.all;
+    use work.processor_configuration_pkg.all;
+    use work.float_alu_pkg.all;
+    use work.float_type_definitions_pkg.all;
+    use work.float_to_real_conversions_pkg.all;
+
+    use work.memory_processing_pkg.all;
+    use work.float_assembler_pkg.all;
+    use work.microinstruction_pkg.all;
+
+    use work.boost_model_pkg.all;
+
+entity boost_rtl_tb is
+  generic (runner_cfg : string);
+end;
+
+architecture vunit_simulation of boost_rtl_tb is
+
+
+    constant clock_period      : time    := 1 ns;
+    
+    signal simulator_clock     : std_logic := '0';
+    signal simulation_counter  : natural   := 0;
+    -----------------------------------
+    -- simulation specific signals ----
+    ------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+    signal realtime   : real := 0.0;
+    constant stoptime : real := 10.0e-3;
+
+    constant initial_voltage : real := 100.0;
+
+    function build_boost_model (filter_gain : real range 0.0 to 1.0; u_address, y_address, g_address, temp_address : natural) 
+    return ram_array
+    is
         variable retval : ram_array := (others => (others => '0'));
     begin
         for i in boost_program'range loop
             retval(i + 128) := boost_program(i);
         end loop;
-        retval(input_voltage_addr ) := to_std_logic_vector(to_float(100.0  )  ) ;
-        retval(udc                ) := to_std_logic_vector(to_float(100.0  )  ) ;
+        retval(input_voltage_addr ) := to_std_logic_vector(to_float(initial_voltage  )  ) ;
+        retval(udc                ) := to_std_logic_vector(to_float(initial_voltage  )  ) ;
         retval(current_addr       ) := to_std_logic_vector(to_float(0.0  )  ) ;
         retval(c_addr             ) := to_std_logic_vector(to_float(c    )  ) ;
         retval(l_addr             ) := to_std_logic_vector(to_float(l    )  ) ;
-        retval(r_addr             ) := to_std_logic_vector(to_float(-0.24    )  ) ;
+        retval(r_addr             ) := to_std_logic_vector(to_float(rl    )  ) ;
         retval(duty               ) := to_std_logic_vector(to_float(0.5 )  ) ;
         retval(iload              ) := to_std_logic_vector(to_float(0.0  )  ) ;
 
         return retval;
-    end build_lcr_sw;
+    end build_boost_model;
 
 ------------------------------------------------------------------------
-    constant ram_contents : ram_array := build_lcr_sw(0.05 , 0 , 0 , 0, 0);
+    constant ram_contents : ram_array := build_boost_model(0.05 , 0 , 0 , 0, 0);
 ------------------------------------------------------------------------
 
     signal self                     : simple_processor_record := init_processor;
@@ -122,8 +185,8 @@ architecture vunit_simulation of boost_rtl_tb is
 
     signal processor_is_ready : boolean := false;
 
-    signal counter : natural range 0 to 7 :=7;
-    signal counter2 : natural range 0 to 7 :=7;
+    signal counter  : natural range 0 to 7 := 7;
+    signal counter2 : natural range 0 to 7 := 7;
 
     signal result1 : real := 0.0;
     signal result2 : real := 0.0;
@@ -154,8 +217,19 @@ begin
 ------------------------------------------------------------------------
 
     stimulus : process(simulator_clock)
+
+        variable boost_model : boost_model_record := (0.0, initial_voltage);
+
+        variable ref_input_voltage : real := 100.0;
+        variable ref_load_current  : real := 0.0;
+        variable ref_duty          : real := 0.5;
+
         variable used_instruction : t_instruction;
-        file file_handler : text open write_mode is "boost_rtl_tb.dat";
+        variable inductor_current : real := 0.0;
+        variable dc_link_voltage  : real := initial_voltage;
+        file file_handler         : text open write_mode is "boost_rtl_tb.dat";
+
+
     begin
         if rising_edge(simulator_clock) then
             simulation_counter <= simulation_counter + 1;
@@ -203,7 +277,8 @@ begin
             if simulation_counter = 0 then
                 request_processor(self, 128);
                 realtime <= realtime + timestep;
-                write_to(file_handler,(realtime, result3, result2, voltage, current));
+                write_to(file_handler,(realtime, result3, result2, boost_model.dc_link_voltage, boost_model.inductor_current));
+                boost_model := calculate_boost(self => boost_model, duty => ref_duty, load_current => ref_load_current, input_voltage => ref_input_voltage);
             end if;
 
             ready_pipeline <= ready_pipeline(ready_pipeline'left-1 downto 0) & '0';
@@ -213,22 +288,27 @@ begin
 
             if ready_pipeline(ready_pipeline'left) = '1' then
                 realtime <= realtime + timestep;
-                write_to(file_handler,(realtime, result3, result2, voltage, current));
+                boost_model := calculate_boost(boost_model, ref_duty, ref_load_current, ref_input_voltage);
+                write_to(file_handler,(realtime, result3, result2, boost_model.dc_link_voltage, boost_model.inductor_current));
                 request_processor(self, 128);
                 CASE sequence_counter is
                     WHEN 0 =>
                         if realtime > 2.0e-3 then
-                            write_data_to_ram(ram_write_port, duty, to_std_logic_vector(to_float(0.25)));
+                            ref_duty := 0.25;
+                            write_data_to_ram(ram_write_port, duty, to_std_logic_vector(to_float(ref_duty)));
+
                             sequence_counter <= sequence_counter + 1;
                         end if;
                     WHEN 1 =>
                         if realtime > 4.0e-3 then
-                            write_data_to_ram(ram_write_port, input_voltage_addr, to_std_logic_vector(to_float(120.0)));
+                            ref_input_voltage := 120.0;
+                            write_data_to_ram(ram_write_port, input_voltage_addr, to_std_logic_vector(to_float(ref_input_voltage)));
                             sequence_counter <= sequence_counter + 1;
                         end if;
                     WHEN 2 =>
                         if realtime > 6.0e-3 then
-                            write_data_to_ram(ram_write_port, iload, to_std_logic_vector(to_float(-10.0)));
+                            ref_load_current := -10.0;
+                            write_data_to_ram(ram_write_port, iload, to_std_logic_vector(to_float(ref_load_current)));
                             sequence_counter <= sequence_counter + 1;
                         end if;
                     WHEN others => --do nothing
